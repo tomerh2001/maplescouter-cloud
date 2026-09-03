@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeApp, samplePreset, type TestApp } from './helpers.js';
 
 let t: TestApp;
@@ -349,5 +349,71 @@ describe('unknown routes', () => {
     const res = await t.app.inject({ method: 'GET', url: '/nope' });
     expect(res.statusCode).toBe(404);
     expect(res.json()).toEqual({ error: 'not_found' });
+  });
+});
+
+describe('reviewer regressions', () => {
+  it('answers HEAD for auto-exposed GET routes (uptime monitors)', async () => {
+    for (const url of ['/healthz', '/', '/v1/characters']) {
+      const res = await t.app.inject({ method: 'HEAD', url });
+      expect(res.statusCode, url).toBe(200);
+      expect(res.body).toBe('');
+    }
+  });
+
+  it('HEAD /v1/characters/:ign sends Content-Length and honours If-None-Match', async () => {
+    await put('HTomer', { preset: samplePreset() });
+    const full = await get('HTomer');
+    const head = await t.app.inject({ method: 'HEAD', url: '/v1/characters/HTomer' });
+    expect(head.statusCode).toBe(200);
+    expect(head.headers.etag).toBe(full.headers.etag);
+    expect(Number(head.headers['content-length'])).toBe(Buffer.byteLength(full.body, 'utf8'));
+    const notModified = await t.app.inject({
+      method: 'HEAD',
+      url: '/v1/characters/HTomer',
+      headers: { 'if-none-match': String(full.headers.etag) },
+    });
+    expect(notModified.statusCode).toBe(304);
+  });
+
+  it('keys the rate limiter on CF-Connecting-IP, so a forged X-Forwarded-For cannot dodge it', async () => {
+    await t.close();
+    t = await makeApp({ writeRateLimit: 2 });
+    const codes: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const res = await put('HTomer', { preset: samplePreset() }, {
+        'cf-connecting-ip': '203.0.113.7',
+        'x-forwarded-for': `10.0.0.${i}, 172.16.0.1`, // attacker-controlled, must be ignored
+      });
+      codes.push(res.statusCode);
+    }
+    expect(codes).toEqual([201, 200, 429]);
+    // A different edge-asserted client gets its own bucket.
+    const other = await put('Other', { preset: samplePreset() }, { 'cf-connecting-ip': '198.51.100.9' });
+    expect(other.statusCode).toBe(201);
+  });
+
+  it('falls back to the last X-Forwarded-For hop, then the socket, when CF-Connecting-IP is absent', async () => {
+    const { clientIp } = await import('../src/app.js');
+    expect(clientIp({ headers: { 'x-forwarded-for': ' 1.1.1.1 , 2.2.2.2 ' }, ip: '9.9.9.9' })).toBe('2.2.2.2');
+    expect(clientIp({ headers: {}, ip: '9.9.9.9' })).toBe('9.9.9.9');
+    expect(clientIp({ headers: { 'cf-connecting-ip': '8.8.8.8', 'x-forwarded-for': '1.1.1.1' }, ip: '9.9.9.9' })).toBe('8.8.8.8');
+  });
+
+  it('keeps serving a document when DELETE cannot unlink the file', async () => {
+    await put('HTomer', { preset: samplePreset() });
+    const fsp = (await import('node:fs')).promises;
+    const spy = vi.spyOn(fsp, 'unlink').mockRejectedValueOnce(Object.assign(new Error('EACCES'), { code: 'EACCES' }));
+    try {
+      const failed = await t.app.inject({ method: 'DELETE', url: '/v1/characters/HTomer', headers: { 'x-confirm': 'HTomer' } });
+      expect(failed.statusCode).toBe(500);
+      expect((await get('HTomer')).statusCode).toBe(200); // index intact
+      expect((await t.app.inject({ method: 'GET', url: '/healthz' })).json().characters).toBe(1);
+    } finally {
+      spy.mockRestore();
+    }
+    const ok = await t.app.inject({ method: 'DELETE', url: '/v1/characters/HTomer', headers: { 'x-confirm': 'HTomer' } });
+    expect(ok.statusCode).toBe(204);
+    expect((await get('HTomer')).statusCode).toBe(404);
   });
 });

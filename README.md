@@ -141,7 +141,7 @@ All via environment variables.
 | `DATA_DIR` | `/data` | Store root; documents live in `DATA_DIR/characters/` |
 | `LOG_LEVEL` | `info` | pino level |
 | `LOG_PRETTY` | `false` | Human-readable logs (dev only; needs `pino-pretty`) |
-| `TRUST_PROXY` | `true` | Trust `X-Forwarded-*` for the client IP |
+| `TRUST_PROXY` | `true` | Trust one proxy hop (traefik) for `X-Forwarded-*`. The rate-limit key is `CF-Connecting-IP` when present (set by the Cloudflare edge), else the last `X-Forwarded-For` hop, else the socket address — so a client cannot dodge the limiter by forging `X-Forwarded-For` |
 | `BODY_LIMIT` | `262144` | Max request body in bytes |
 | `READ_RATE_LIMIT` | `600` | Reads per minute per IP |
 | `WRITE_RATE_LIMIT` | `60` | Writes per minute per IP, per endpoint |

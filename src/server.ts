@@ -5,7 +5,7 @@ import { CharacterStore } from './store.js';
 
 const config = loadConfig();
 const logger = createLogger(config);
-const store = await CharacterStore.open(config.dataDir, logger);
+const store = await CharacterStore.open(config.dataDir, logger, { maxCharacters: config.maxCharacters });
 const app = await buildApp({ config, store, logger });
 
 let closing = false;

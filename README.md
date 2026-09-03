@@ -1,7 +1,7 @@
 # MapleScouter Cloud
 
-Tiny cloud-save backend for the [MapleScouter English Fix](https://github.com/tomerh2001/maplescouter-en-fix) userscript.
-It stores Manual Input presets from [maplescouter.com](https://maplescouter.com), keyed by IGN, so a character can be synced between browsers and devices.
+Tiny cloud-save backend for the [MapleScouter Enhancements](https://github.com/tomerh2001/maplescouter-en-fix) userscript and extension.
+It stores Character page presets from [maplescouter.com](https://maplescouter.com), keyed by IGN, so a character can be synced between browsers and devices.
 
 Live instance: `https://scouter.tomerh2001.com`
 
@@ -84,13 +84,14 @@ Concurrency: send `If-Match: "<updatedAt>"` (the `ETag` you last saw). If the st
 | 413 | `payload_too_large` | Body over 256 KB |
 | 415 | `unsupported_media_type` | Missing `Content-Type: application/json` |
 | 429 | `rate_limited` | See below; `Retry-After` header is set |
+| 507 | `storage_full` | The store holds `MAX_CHARACTERS` characters and this IGN is new. Overwriting an existing IGN still works |
 
 ### Rate limits (hygiene, not auth)
 
 - Reads (`GET`/`HEAD`): 600 per minute per IP, shared across read endpoints.
 - Writes (`PUT`, `DELETE`): 60 per minute per IP, per endpoint.
 - `/healthz`, `/` and CORS preflights are never limited.
-- The client IP comes from `X-Forwarded-For` (`TRUST_PROXY=true`, the service sits behind traefik).
+- The client IP is `CF-Connecting-IP` (set by the Cloudflare edge) when the header is present and `TRUST_PROXY` and `TRUST_CF_HEADER` are both on (the defaults). Otherwise it is the last `X-Forwarded-For` hop with `TRUST_PROXY=true`, or the socket address with `TRUST_PROXY=false`.
 
 ### curl examples
 
@@ -141,10 +142,12 @@ All via environment variables.
 | `DATA_DIR` | `/data` | Store root; documents live in `DATA_DIR/characters/` |
 | `LOG_LEVEL` | `info` | pino level |
 | `LOG_PRETTY` | `false` | Human-readable logs (dev only; needs `pino-pretty`) |
-| `TRUST_PROXY` | `true` | Trust one proxy hop (traefik) for `X-Forwarded-*`. The rate-limit key is `CF-Connecting-IP` when present (set by the Cloudflare edge), else the last `X-Forwarded-For` hop, else the socket address — so a client cannot dodge the limiter by forging `X-Forwarded-For` |
+| `TRUST_PROXY` | `true` | Trust one proxy hop (traefik) for `X-Forwarded-*`. With `false` no forwarding header is read at all and the socket address is the client |
+| `TRUST_CF_HEADER` | `true` | Key the rate limiter on `CF-Connecting-IP` (set by the Cloudflare edge) when present, else fall back to the address above. Only used when `TRUST_PROXY=true`. Turn it off if traefik is reachable without Cloudflare in front, otherwise a client can forge the header and get a fresh bucket per request |
 | `BODY_LIMIT` | `262144` | Max request body in bytes |
 | `READ_RATE_LIMIT` | `600` | Reads per minute per IP |
 | `WRITE_RATE_LIMIT` | `60` | Writes per minute per IP, per endpoint |
+| `MAX_CHARACTERS` | `20000` | Max stored characters. New IGNs past this get `507`, so one client cannot fill the disk |
 
 ## Development
 
@@ -195,9 +198,13 @@ GitHub profile -> Packages -> `maplescouter-cloud` -> Package settings -> Danger
 Runs on the home server as a normal stack:
 
 - traefik router on `scouter.tomerh2001.com`, middlewares `cloudflarewarp` + `crowdsec` (no auth middleware, by design).
+- The Cloudflare tunnel must stay the only way to reach that router. `cloudflarewarp` rewrites `X-Forwarded-For` from `CF-Connecting-IP` only for Cloudflare sources, so a LAN client that could reach traefik directly could inject its own `CF-Connecting-IP`. If you ever expose the service another way, set `TRUST_CF_HEADER=false`.
 - Env: `PORT=8080`, `DATA_DIR=/data`, `NODE_ENV=production`.
 - Volume: `<data dataset>/maplescouter-cloud:/data`; container runs as `PUID:PGID`.
 - The image's own healthcheck is used; the stack-level one stays off.
+- Cap the container logs. Docker keeps stdout forever by default, so set on the service:
+  `logging: { driver: json-file, options: { max-size: 10m, max-file: "3" } }`.
+  Each request logs one line (method, route pattern, status, duration, client IP). The IGN is not logged.
 
 Verify after deploy:
 

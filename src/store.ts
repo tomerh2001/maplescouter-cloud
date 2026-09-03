@@ -13,9 +13,15 @@ export interface PutOptions {
   ifMatch?: readonly string[];
 }
 
+export interface StoreOptions {
+  /** Cap on the number of stored characters. Creates past the cap fail with `full`; overwrites are unaffected. */
+  maxCharacters?: number;
+}
+
 export type PutResult =
   | { status: 'created' | 'updated'; doc: CharacterDoc }
-  | { status: 'conflict'; updatedAt: string | null };
+  | { status: 'conflict'; updatedAt: string | null }
+  | { status: 'full' };
 
 export class InvalidKeyError extends Error {
   constructor(key: unknown) {
@@ -63,22 +69,28 @@ export function nextTimestamp(previous?: string, now: Date = new Date()): string
  * File-backed character store: one `<key>.json` per character under `<dataDir>/characters`,
  * written atomically (temp file + fsync + rename). An in-memory index of summaries is rebuilt from
  * the directory on open and kept current on every write, so listing and HEAD never touch the disk.
+ * The number of documents is capped (`maxCharacters`) so one client cannot fill the disk or bloat the index.
  */
 export class CharacterStore {
   readonly directory: string;
+  readonly maxCharacters: number;
   private readonly index = new Map<string, CharacterSummary>();
+  /** Memoised `list()` order (updatedAt desc, ties by IGN); null until needed, dropped on every index change. */
+  private sorted: CharacterSummary[] | null = null;
   /** On-disk size of each document in bytes (for HEAD Content-Length). */
   private readonly sizes = new Map<string, number>();
   private readonly locks = new Map<string, Promise<void>>();
   private readonly log: StoreLogger | undefined;
 
-  private constructor(dataDir: string, log?: StoreLogger) {
+  private constructor(dataDir: string, log?: StoreLogger, opts: StoreOptions = {}) {
     this.directory = path.join(path.resolve(dataDir), 'characters');
     this.log = log;
+    const cap = opts.maxCharacters;
+    this.maxCharacters = cap !== undefined && Number.isFinite(cap) && cap > 0 ? Math.trunc(cap) : Infinity;
   }
 
-  static async open(dataDir: string, log?: StoreLogger): Promise<CharacterStore> {
-    const store = new CharacterStore(dataDir, log);
+  static async open(dataDir: string, log?: StoreLogger, opts: StoreOptions = {}): Promise<CharacterStore> {
+    const store = new CharacterStore(dataDir, log, opts);
     await fs.mkdir(store.directory, { recursive: true });
     await store.rebuildIndex();
     return store;
@@ -106,10 +118,10 @@ export class CharacterStore {
   /** Summaries sorted by updatedAt desc (ties by IGN), capped at `limit` (max 500). */
   list(limit: number = DEFAULT_LIST_LIMIT): CharacterSummary[] {
     const cap = Math.max(0, Math.min(Math.trunc(limit), MAX_LIST_LIMIT));
-    return [...this.index.values()]
-      .sort((a, b) => (a.updatedAt === b.updatedAt ? a.ign.localeCompare(b.ign) : a.updatedAt < b.updatedAt ? 1 : -1))
-      .slice(0, cap)
-      .map(cloneSummary);
+    this.sorted ??= [...this.index.values()].sort((a, b) =>
+      a.updatedAt === b.updatedAt ? a.ign.localeCompare(b.ign) : a.updatedAt < b.updatedAt ? 1 : -1,
+    );
+    return this.sorted.slice(0, cap).map(cloneSummary);
   }
 
   async get(key: string): Promise<CharacterDoc | undefined> {
@@ -121,6 +133,7 @@ export class CharacterStore {
       if (isNodeError(err) && err.code === 'ENOENT') {
         this.index.delete(key);
         this.sizes.delete(key);
+        this.sorted = null;
         return undefined;
       }
       throw err;
@@ -134,6 +147,10 @@ export class CharacterStore {
       if (opts.ifMatch !== undefined) {
         const matches = current !== undefined && opts.ifMatch.some((tag) => tag === '*' || tag === current.updatedAt);
         if (!matches) return { status: 'conflict', updatedAt: current?.updatedAt ?? null };
+      }
+      if (current === undefined && this.index.size >= this.maxCharacters) {
+        this.log?.warn({ key, characters: this.index.size }, 'character cap reached, create refused');
+        return { status: 'full' };
       }
 
       const updatedAt = nextTimestamp(current?.updatedAt);
@@ -149,8 +166,10 @@ export class CharacterStore {
       await this.writeAtomic(file, key, contents);
       this.index.set(key, toSummary(doc));
       this.sizes.set(key, Buffer.byteLength(contents, 'utf8'));
+      this.sorted = null;
       const status = current === undefined ? 'created' : 'updated';
-      this.log?.info({ key, status }, 'character saved');
+      // No key here: this fires on every save, and the IGN does not belong in the retained log stream.
+      this.log?.info({ status, characters: this.index.size }, 'character saved');
       return { status, doc };
     });
   }
@@ -167,10 +186,12 @@ export class CharacterStore {
       } catch (err) {
         if (!isNodeError(err) || err.code !== 'ENOENT') throw err;
       }
+      if (unlinked) await this.syncDirectory();
       const indexed = this.index.delete(key);
       this.sizes.delete(key);
+      this.sorted = null;
       const removed = indexed || unlinked;
-      if (removed) this.log?.info({ key }, 'character deleted');
+      if (removed) this.log?.info({ characters: this.index.size }, 'character deleted');
       return removed;
     });
   }
@@ -205,11 +226,28 @@ export class CharacterStore {
       await fs.rm(tmp, { force: true });
       throw err;
     }
+    // The rename is only a directory-entry change: flush it so a crash after the response cannot
+    // roll the file back to the previous version (or to nothing) while the client keeps the new ETag.
+    await this.syncDirectory();
+  }
+
+  /** fsync the store directory after a rename/unlink. Filesystems that refuse directory fsync are tolerated. */
+  private async syncDirectory(): Promise<void> {
+    let dir: fs.FileHandle | undefined;
+    try {
+      dir = await fs.open(this.directory, 'r');
+      await dir.sync();
+    } catch (err) {
+      if (!isNodeError(err) || !['EINVAL', 'EPERM', 'ENOTSUP', 'EISDIR', 'EBADF'].includes(err.code ?? '')) throw err;
+    } finally {
+      await dir?.close();
+    }
   }
 
   private async rebuildIndex(): Promise<void> {
     this.index.clear();
     this.sizes.clear();
+    this.sorted = null;
     const entries = await fs.readdir(this.directory, { withFileTypes: true });
     let skipped = 0;
     for (const entry of entries) {

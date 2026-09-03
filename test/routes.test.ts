@@ -217,6 +217,25 @@ describe('PUT + GET /v1/characters/:ign', () => {
     const star = await put('HTomer', { preset }, { 'if-match': '*' });
     expect(star.statusCode).toBe(200);
   });
+
+  it('answers 507 storage_full for a new IGN once MAX_CHARACTERS is reached', async () => {
+    await t.close();
+    t = await makeApp({ maxCharacters: 2 });
+    expect((await put('First', { preset: samplePreset() })).statusCode).toBe(201);
+    expect((await put('Second', { preset: samplePreset() })).statusCode).toBe(201);
+
+    const full = await put('Third', { preset: samplePreset() });
+    expect(full.statusCode).toBe(507);
+    expect(full.json()).toEqual({ error: 'storage_full', limit: 2 });
+    expect(t.store.size()).toBe(2);
+    expect((await get('Third')).statusCode).toBe(404);
+
+    // Existing IGNs can still be overwritten, and a freed slot can be reused.
+    expect((await put('first', { preset: samplePreset() })).statusCode).toBe(200);
+    const del = await t.app.inject({ method: 'DELETE', url: '/v1/characters/Second', headers: { 'x-confirm': 'second' } });
+    expect(del.statusCode).toBe(204);
+    expect((await put('Third', { preset: samplePreset() })).statusCode).toBe(201);
+  });
 });
 
 describe('HEAD /v1/characters/:ign', () => {
@@ -309,7 +328,8 @@ describe('CORS', () => {
     await put('HTomer', { preset: samplePreset() });
     const res = await get('HTomer', { origin: 'https://maplescouter.com' });
     expect(res.headers['access-control-allow-origin']).toBe('*');
-    expect(res.headers['access-control-expose-headers']).toBe('ETag');
+    expect(String(res.headers['access-control-expose-headers'])).toContain('ETag');
+    expect(String(res.headers['access-control-expose-headers'])).toContain('Retry-After');
   });
 });
 
@@ -393,11 +413,54 @@ describe('reviewer regressions', () => {
     expect(other.statusCode).toBe(201);
   });
 
-  it('falls back to the last X-Forwarded-For hop, then the socket, when CF-Connecting-IP is absent', async () => {
+  it('falls back to request.ip when CF-Connecting-IP is absent, and ignores it when the proxy is not trusted', async () => {
     const { clientIp } = await import('../src/app.js');
-    expect(clientIp({ headers: { 'x-forwarded-for': ' 1.1.1.1 , 2.2.2.2 ' }, ip: '9.9.9.9' })).toBe('2.2.2.2');
-    expect(clientIp({ headers: {}, ip: '9.9.9.9' })).toBe('9.9.9.9');
-    expect(clientIp({ headers: { 'cf-connecting-ip': '8.8.8.8', 'x-forwarded-for': '1.1.1.1' }, ip: '9.9.9.9' })).toBe('8.8.8.8');
+    const trusted = { trustProxy: true, trustCfHeader: true };
+    expect(clientIp({ headers: {}, ip: '9.9.9.9' }, trusted)).toBe('9.9.9.9');
+    expect(clientIp({ headers: { 'x-forwarded-for': '1.1.1.1' }, ip: '9.9.9.9' }, trusted)).toBe('9.9.9.9');
+    expect(clientIp({ headers: { 'cf-connecting-ip': ' 8.8.8.8 ' }, ip: '9.9.9.9' }, trusted)).toBe('8.8.8.8');
+    expect(clientIp({ headers: { 'cf-connecting-ip': ['8.8.8.8', '7.7.7.7'] }, ip: '9.9.9.9' }, trusted)).toBe('8.8.8.8');
+    const cf = { headers: { 'cf-connecting-ip': '8.8.8.8' }, ip: '9.9.9.9' };
+    expect(clientIp(cf, { trustProxy: false, trustCfHeader: true })).toBe('9.9.9.9');
+    expect(clientIp(cf, { trustProxy: true, trustCfHeader: false })).toBe('9.9.9.9');
+  });
+
+  it('masks IPv6 keys to a /64 and unwraps IPv4-mapped addresses, like the plugin default', async () => {
+    const { normaliseIp } = await import('../src/app.js');
+    expect(normaliseIp('2001:db8::1')).toBe('2001:db8::');
+    expect(normaliseIp('2001:DB8:0:0:ffff::2')).toBe('2001:db8::');
+    expect(normaliseIp('2001:db8:0:1::1')).toBe('2001:db8:0:1::');
+    expect(normaliseIp('::ffff:1.2.3.4')).toBe('1.2.3.4');
+    expect(normaliseIp('1.2.3.4')).toBe('1.2.3.4');
+    expect(normaliseIp('not-an-ip')).toBe('not-an-ip');
+  });
+
+  it('an IPv6 client rotating addresses inside its /64 shares one bucket', async () => {
+    await t.close();
+    t = await makeApp({ writeRateLimit: 1 });
+    const codes: number[] = [];
+    for (const ip of ['2001:db8::1', '2001:db8::2']) {
+      const res = await put('HTomer', { preset: samplePreset() }, { 'cf-connecting-ip': ip });
+      codes.push(res.statusCode);
+    }
+    expect(codes).toEqual([201, 429]);
+    // A different /64 gets its own bucket.
+    const other = await put('Other', { preset: samplePreset() }, { 'cf-connecting-ip': '2001:db8:0:1::1' });
+    expect(other.statusCode).toBe(201);
+  });
+
+  it('with TRUST_PROXY=false a forged CF-Connecting-IP does not get a fresh bucket', async () => {
+    await t.close();
+    t = await makeApp({ trustProxy: false, writeRateLimit: 2 });
+    const codes: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const res = await put('HTomer', { preset: samplePreset() }, {
+        'cf-connecting-ip': `203.0.113.${i}`, // attacker-controlled, must be ignored
+        'x-forwarded-for': `10.0.0.${i}`,
+      });
+      codes.push(res.statusCode);
+    }
+    expect(codes).toEqual([201, 200, 429]);
   });
 
   it('keeps serving a document when DELETE cannot unlink the file', async () => {

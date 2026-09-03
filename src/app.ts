@@ -1,6 +1,8 @@
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
-import Fastify, { type FastifyReply } from 'fastify';
+import Fastify, { LogController, type FastifyReply } from 'fastify';
+import { Address6 } from 'ip-address';
+import { isIPv6 } from 'node:net';
 import type { Logger } from 'pino';
 import type { Config } from './config.js';
 import { parseIgn } from './ign.js';
@@ -57,16 +59,38 @@ function errorInfo(error: unknown): { statusCode: number; code: string; message:
 /**
  * Client address used as the rate-limit key. Behind Cloudflare → cloudflared → traefik the socket peer
  * and the last X-Forwarded-For hop are both infrastructure, while `CF-Connecting-IP` is set by the
- * Cloudflare edge and cannot be spoofed past it. Order: CF-Connecting-IP → last XFF hop → socket.
+ * Cloudflare edge and cannot be spoofed past it. So: CF-Connecting-IP when both TRUST_PROXY and
+ * TRUST_CF_HEADER are on, else Fastify's `request.ip` (which already honours the trustProxy option:
+ * the last X-Forwarded-For hop with TRUST_PROXY=true, the socket peer with TRUST_PROXY=false).
+ * Headers are never consulted when the proxy is not trusted, so a direct client cannot pick its own bucket.
+ * The result is normalised (see normaliseIp) because a custom keyGenerator skips the plugin's own IPv6 masking.
  */
-export function clientIp(request: { headers: Record<string, string | string[] | undefined>; ip: string }): string {
-  const cf = request.headers['cf-connecting-ip'];
-  const cfIp = (Array.isArray(cf) ? cf[0] : cf)?.trim();
-  if (cfIp) return cfIp;
-  const xff = request.headers['x-forwarded-for'];
-  const raw = Array.isArray(xff) ? xff.join(',') : xff;
-  const last = raw?.split(',').map((h) => h.trim()).filter((h) => h !== '').at(-1);
-  return last || request.ip;
+export function clientIp(
+  request: { headers: Record<string, string | string[] | undefined>; ip: string },
+  trust: Pick<Config, 'trustProxy' | 'trustCfHeader'>,
+): string {
+  if (trust.trustProxy && trust.trustCfHeader) {
+    const cf = request.headers['cf-connecting-ip'];
+    const cfIp = (Array.isArray(cf) ? cf[0] : cf)?.trim();
+    if (cfIp) return normaliseIp(cfIp);
+  }
+  return normaliseIp(request.ip);
+}
+
+/**
+ * Mirror @fastify/rate-limit's default key normalisation: IPv4-mapped IPv6 collapses to the IPv4, other IPv6
+ * is masked to its /64 (one residential customer owns 2^64 addresses, so a per-address key could be rotated
+ * around the limiter), and IPv4 is lower-cased. Unparseable input is returned as-is.
+ */
+export function normaliseIp(ip: string): string {
+  if (!isIPv6(ip)) return ip.toLowerCase();
+  try {
+    const address = new Address6(ip);
+    if (address.isMapped4()) return address.to4().correctForm();
+    return new Address6(`${ip}/64`).startAddress().correctForm();
+  } catch {
+    return ip;
+  }
 }
 
 function notFound(reply: FastifyReply): FastifyReply {
@@ -83,6 +107,10 @@ export type App = Awaited<ReturnType<typeof buildApp>>;
 export async function buildApp({ config, store, logger }: AppOptions) {
   const app = Fastify({
     loggerInstance: logger,
+    // Fastify's stock request lines print the concrete URL (which carries the IGN) and `request.ip`,
+    // which behind traefik is cloudflared, not the address the limiter keys on. The onResponse hook
+    // below logs one line per request with the route pattern and the same address as clientIp().
+    logController: new LogController({ disableRequestLogging: true }),
     // Trust exactly one hop (traefik, the socket peer) for X-Forwarded-*; never the whole chain.
     // The limiter key itself comes from clientIp(), see above.
     trustProxy: config.trustProxy ? (_address: string, hop: number) => hop === 0 : false,
@@ -95,7 +123,8 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     origin: '*',
     methods: ['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'If-Match', 'If-None-Match', 'X-Confirm'],
-    exposedHeaders: ['ETag'],
+    // Retry-After and X-RateLimit-* let the browser client tell the user how long to wait on 429.
+    exposedHeaders: ['ETag', 'Retry-After', 'X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
     maxAge: 86_400,
   });
 
@@ -104,12 +133,26 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     global: true,
     max: config.readRateLimit,
     timeWindow: ONE_MINUTE_MS,
-    keyGenerator: (request) => clientIp(request),
+    keyGenerator: (request) => clientIp(request, config),
   });
   const writeLimited = { config: { rateLimit: { max: config.writeRateLimit, timeWindow: ONE_MINUTE_MS } } };
 
   app.addHook('onSend', async (_request, reply) => {
     if (!reply.hasHeader('cache-control')) reply.header('cache-control', 'no-store');
+  });
+
+  app.addHook('onResponse', async (request, reply) => {
+    request.log.info(
+      {
+        method: request.method,
+        // Route pattern, not the URL: the URL contains the IGN. Unmatched requests have no route.
+        route: request.routeOptions.url ?? 'unmatched',
+        status: reply.statusCode,
+        ms: Math.round(reply.elapsedTime),
+        ip: clientIp(request, config),
+      },
+      'request',
+    );
   });
 
   app.setNotFoundHandler((_request, reply) => notFound(reply));
@@ -197,6 +240,9 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     );
     if (result.status === 'conflict') {
       return reply.code(409).send({ error: 'conflict', updatedAt: result.updatedAt });
+    }
+    if (result.status === 'full') {
+      return reply.code(507).send({ error: 'storage_full', limit: store.maxCharacters });
     }
     reply.header('etag', etagFor(result.doc.updatedAt));
     return reply.code(result.status === 'created' ? 201 : 200).send({ ign: result.doc.ign, updatedAt: result.doc.updatedAt });

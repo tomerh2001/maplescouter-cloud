@@ -128,6 +128,49 @@ describe('CharacterStore', () => {
     expect(star.status).toBe('updated');
   });
 
+  it('refuses new characters past maxCharacters but still overwrites and deletes', async () => {
+    const capped = await CharacterStore.open(dir, silentLogger, { maxCharacters: 2 });
+    expect(capped.maxCharacters).toBe(2);
+    expect((await capped.put('aaa', input('aaa'))).status).toBe('created');
+    expect((await capped.put('bbb', input('bbb'))).status).toBe('created');
+    expect(await capped.put('ccc', input('ccc'))).toEqual({ status: 'full' });
+    expect(capped.size()).toBe(2);
+    expect(await readdir(capped.directory)).toEqual(['aaa.json', 'bbb.json']);
+
+    expect((await capped.put('aaa', input('aaa'))).status).toBe('updated');
+    // A conflicting If-Match on a new key is still a conflict, not full.
+    expect(await capped.put('ccc', input('ccc'), { ifMatch: ['x'] })).toEqual({ status: 'conflict', updatedAt: null });
+
+    expect(await capped.delete('bbb')).toBe(true);
+    expect((await capped.put('ccc', input('ccc'))).status).toBe('created');
+    expect(await capped.put('ddd', input('ddd'))).toEqual({ status: 'full' });
+
+    // The cap also holds for documents found on disk at open.
+    const reopened = await CharacterStore.open(dir, silentLogger, { maxCharacters: 2 });
+    expect(reopened.size()).toBe(2);
+    expect(await reopened.put('ddd', input('ddd'))).toEqual({ status: 'full' });
+    // No cap by default.
+    expect(store.maxCharacters).toBe(Infinity);
+  });
+
+  it('keeps the memoised list in step with every index change', async () => {
+    await store.put('aaa', input('aaa'));
+    await store.put('bbb', input('bbb'));
+    expect(store.list().map((s) => s.ign)).toEqual(['bbb', 'aaa']);
+    expect(store.list()).toEqual(store.list());
+
+    await store.put('aaa', input('aaa'));
+    expect(store.list().map((s) => s.ign)).toEqual(['aaa', 'bbb']);
+    await store.delete('bbb');
+    expect(store.list().map((s) => s.ign)).toEqual(['aaa']);
+
+    // A file that vanished behind the store's back drops out of the list once get() notices.
+    await rm(path.join(store.directory, 'aaa.json'));
+    expect(store.list()).toHaveLength(1);
+    expect(await store.get('aaa')).toBeUndefined();
+    expect(store.list()).toEqual([]);
+  });
+
   it('rejects keys that are not lowercase alphanumerics (no traversal)', async () => {
     for (const bad of ['../x', 'HTomer', '', 'a'.repeat(17), 'a/b', 'a\\b', '..', '.', 'a.json', 'a b']) {
       await expect(store.get(bad), bad).rejects.toBeInstanceOf(InvalidKeyError);

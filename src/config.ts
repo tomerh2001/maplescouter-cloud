@@ -6,15 +6,20 @@ export interface Config {
   logPretty: boolean;
   /** Max request body in bytes. */
   bodyLimit: number;
-  /** Trust X-Forwarded-* (we sit behind traefik). */
+  /** Trust one X-Forwarded-* hop (we sit behind traefik). When false the socket address is the client. */
   trustProxy: boolean;
+  /** Key the rate limiter on CF-Connecting-IP (set by the Cloudflare edge). Only used when trustProxy is true. */
+  trustCfHeader: boolean;
   /** Reads (GET/HEAD) per minute per IP. */
   readRateLimit: number;
   /** Writes (PUT/DELETE) per minute per IP, per endpoint. */
   writeRateLimit: number;
+  /** Max stored characters. Creating a new one past this cap is refused with 507; overwrites still work. */
+  maxCharacters: number;
 }
 
 export const DEFAULT_BODY_LIMIT = 256 * 1024;
+export const DEFAULT_MAX_CHARACTERS = 20_000;
 
 function intEnv(raw: string | undefined, fallback: number): number {
   if (raw === undefined || raw.trim() === '') return fallback;
@@ -36,7 +41,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     logPretty: boolEnv(env.LOG_PRETTY, false),
     bodyLimit: intEnv(env.BODY_LIMIT, DEFAULT_BODY_LIMIT),
     trustProxy: boolEnv(env.TRUST_PROXY, true),
+    trustCfHeader: boolEnv(env.TRUST_CF_HEADER, true),
     readRateLimit: intEnv(env.READ_RATE_LIMIT, 600),
     writeRateLimit: intEnv(env.WRITE_RATE_LIMIT, 60),
+    maxCharacters: intEnv(env.MAX_CHARACTERS, DEFAULT_MAX_CHARACTERS),
   };
 }

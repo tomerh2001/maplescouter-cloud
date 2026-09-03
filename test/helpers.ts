@@ -52,7 +52,7 @@ export interface TestApp {
 export async function makeApp(overrides: Partial<Config> = {}): Promise<TestApp> {
   const dir = await tempDir();
   const config: Config = { ...loadConfig({}), dataDir: dir, logLevel: 'silent', ...overrides };
-  const store = await CharacterStore.open(dir, silentLogger);
+  const store = await CharacterStore.open(dir, silentLogger, { maxCharacters: config.maxCharacters });
   const app = await buildApp({ config, store, logger: silentLogger });
   await app.ready();
   return {

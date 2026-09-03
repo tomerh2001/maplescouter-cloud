@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+dist
+tmp
+data
+coverage
+test
+vitest.config.ts
+*.md
+*.log
+.env
+.DS_Store
+.nvmrc

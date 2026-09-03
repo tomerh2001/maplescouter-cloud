@@ -70,7 +70,7 @@ describe('validatePutBody', () => {
     const res = validatePutBody({ preset: samplePreset(), label: '  Main  ', meta: { class: 'x', level: '5', hexaStat: '3' } });
     expect(res).toEqual({
       ok: true,
-      value: expect.objectContaining({ label: 'Main', meta: { class: 'x', level: 5, hexaStat: 3, hexaConverted: null } }),
+      value: expect.objectContaining({ label: 'Main', meta: { class: 'x', level: 5, hexaStat: 3 } }),
     });
   });
 
@@ -128,5 +128,18 @@ describe('deriveMeta hexaConverted', () => {
     expect(deriveMeta(preset, { hexaConverted: Number.NaN }).hexaConverted).toBeNull();
     expect(deriveMeta(preset, { hexaConverted: '5' as never }).hexaConverted).toBeNull();
     expect(deriveMeta(preset).hexaConverted).toBeNull();
+  });
+});
+
+describe('validatePutBody meta.hexaConverted', () => {
+  it('normalises a positive number (string or number) and rejects the rest', async () => {
+    const { validatePutBody } = await import('../src/validate.js');
+    const { samplePreset } = await import('./helpers.js');
+    const ok = validatePutBody({ preset: samplePreset(), meta: { hexaConverted: '112289.4' } });
+    expect(ok.ok && ok.value.meta?.hexaConverted).toBe(112289);
+    expect(validatePutBody({ preset: samplePreset(), meta: { hexaConverted: 0 } }).ok).toBe(false);
+    expect(validatePutBody({ preset: samplePreset(), meta: { hexaConverted: 'abc' } }).ok).toBe(false);
+    const absent = validatePutBody({ preset: samplePreset(), meta: { level: 1 } });
+    expect(absent.ok && 'hexaConverted' in (absent.value.meta ?? {})).toBe(false);
   });
 });

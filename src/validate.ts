@@ -89,6 +89,11 @@ function validateMeta(raw: unknown): Validation<Partial<CharacterMeta> | undefin
     if (hexaStat === null) return fail('meta.hexaStat must be a non-negative integer');
     meta.hexaStat = hexaStat;
   }
+  if (raw.hexaConverted !== undefined && raw.hexaConverted !== null) {
+    const hc = typeof raw.hexaConverted === 'string' && raw.hexaConverted.trim() !== '' ? Number(raw.hexaConverted) : raw.hexaConverted;
+    if (typeof hc !== 'number' || !Number.isFinite(hc) || hc <= 0) return fail('meta.hexaConverted must be a positive number');
+    meta.hexaConverted = Math.round(hc);
+  }
   return { ok: true, value: meta };
 }
 

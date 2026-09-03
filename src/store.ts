@@ -67,6 +67,8 @@ export function nextTimestamp(previous?: string, now: Date = new Date()): string
 export class CharacterStore {
   readonly directory: string;
   private readonly index = new Map<string, CharacterSummary>();
+  /** On-disk size of each document in bytes (for HEAD Content-Length). */
+  private readonly sizes = new Map<string, number>();
   private readonly locks = new Map<string, Promise<void>>();
   private readonly log: StoreLogger | undefined;
 
@@ -88,6 +90,11 @@ export class CharacterStore {
 
   has(key: string): boolean {
     return this.index.has(key);
+  }
+
+  /** Byte size of the stored document, if indexed. */
+  byteSize(key: string): number | undefined {
+    return this.sizes.get(key);
   }
 
   /** Index-only lookup (no disk access). */
@@ -113,6 +120,7 @@ export class CharacterStore {
     } catch (err) {
       if (isNodeError(err) && err.code === 'ENOENT') {
         this.index.delete(key);
+        this.sizes.delete(key);
         return undefined;
       }
       throw err;
@@ -137,8 +145,10 @@ export class CharacterStore {
         meta: { ...input.meta },
         preset: input.preset,
       };
-      await this.writeAtomic(file, key, JSON.stringify(doc));
+      const contents = JSON.stringify(doc);
+      await this.writeAtomic(file, key, contents);
       this.index.set(key, toSummary(doc));
+      this.sizes.set(key, Buffer.byteLength(contents, 'utf8'));
       const status = current === undefined ? 'created' : 'updated';
       this.log?.info({ key, status }, 'character saved');
       return { status, doc };
@@ -148,7 +158,8 @@ export class CharacterStore {
   async delete(key: string): Promise<boolean> {
     const file = this.filePath(key);
     return this.withLock(key, async () => {
-      const indexed = this.index.delete(key);
+      // Unlink FIRST: if the disk refuses, the index must keep serving the document (a 500 here
+      // must not make it vanish until the next restart).
       let unlinked = false;
       try {
         await fs.unlink(file);
@@ -156,6 +167,8 @@ export class CharacterStore {
       } catch (err) {
         if (!isNodeError(err) || err.code !== 'ENOENT') throw err;
       }
+      const indexed = this.index.delete(key);
+      this.sizes.delete(key);
       const removed = indexed || unlinked;
       if (removed) this.log?.info({ key }, 'character deleted');
       return removed;
@@ -196,6 +209,7 @@ export class CharacterStore {
 
   private async rebuildIndex(): Promise<void> {
     this.index.clear();
+    this.sizes.clear();
     const entries = await fs.readdir(this.directory, { withFileTypes: true });
     let skipped = 0;
     for (const entry of entries) {
@@ -221,6 +235,7 @@ export class CharacterStore {
           continue;
         }
         this.index.set(key, toSummary(doc));
+        this.sizes.set(key, (await fs.stat(path.join(this.directory, name))).size);
       } catch (err) {
         skipped++;
         this.log?.warn({ file: name, err }, 'skipping unreadable character file');

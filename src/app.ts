@@ -54,6 +54,21 @@ function errorInfo(error: unknown): { statusCode: number; code: string; message:
   };
 }
 
+/**
+ * Client address used as the rate-limit key. Behind Cloudflare → cloudflared → traefik the socket peer
+ * and the last X-Forwarded-For hop are both infrastructure, while `CF-Connecting-IP` is set by the
+ * Cloudflare edge and cannot be spoofed past it. Order: CF-Connecting-IP → last XFF hop → socket.
+ */
+export function clientIp(request: { headers: Record<string, string | string[] | undefined>; ip: string }): string {
+  const cf = request.headers['cf-connecting-ip'];
+  const cfIp = (Array.isArray(cf) ? cf[0] : cf)?.trim();
+  if (cfIp) return cfIp;
+  const xff = request.headers['x-forwarded-for'];
+  const raw = Array.isArray(xff) ? xff.join(',') : xff;
+  const last = raw?.split(',').map((h) => h.trim()).filter((h) => h !== '').at(-1);
+  return last || request.ip;
+}
+
 function notFound(reply: FastifyReply): FastifyReply {
   return reply.code(404).send({ error: 'not_found' });
 }
@@ -68,10 +83,12 @@ export type App = Awaited<ReturnType<typeof buildApp>>;
 export async function buildApp({ config, store, logger }: AppOptions) {
   const app = Fastify({
     loggerInstance: logger,
-    trustProxy: config.trustProxy,
+    // Trust exactly one hop (traefik, the socket peer) for X-Forwarded-*; never the whole chain.
+    // The limiter key itself comes from clientIp(), see above.
+    trustProxy: config.trustProxy ? (_address: string, hop: number) => hop === 0 : false,
     bodyLimit: config.bodyLimit,
-    // HEAD /v1/characters/:ign is registered explicitly (index-only, no file read).
-    exposeHeadRoutes: false,
+    // Auto-HEAD for every GET (uptime monitors probe with HEAD); /v1/characters/:ign overrides it below.
+    exposeHeadRoutes: true,
   });
 
   await app.register(cors, {
@@ -87,6 +104,7 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     global: true,
     max: config.readRateLimit,
     timeWindow: ONE_MINUTE_MS,
+    keyGenerator: (request) => clientIp(request),
   });
   const writeLimited = { config: { rateLimit: { max: config.writeRateLimit, timeWindow: ONE_MINUTE_MS } } };
 
@@ -131,6 +149,22 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     return { characters: store.list(limit) };
   });
 
+  // Registered BEFORE the GET so exposeHeadRoutes does not auto-generate (and collide with) a HEAD here.
+  app.head<{ Params: IgnParams }>('/v1/characters/:ign', async (request, reply) => {
+    const parsed = parseIgn(request.params.ign);
+    if (parsed === null) return reply.code(400).send();
+    const summary = store.summary(parsed.key);
+    if (summary === undefined) return reply.code(404).send();
+    reply.header('etag', etagFor(summary.updatedAt));
+    if (tagsMatch(parseEntityTags(request.headers['if-none-match']), summary.updatedAt)) {
+      return reply.code(304).send();
+    }
+    reply.header('content-type', 'application/json; charset=utf-8');
+    const bytes = store.byteSize(parsed.key);
+    if (bytes !== undefined) reply.header('content-length', String(bytes));
+    return reply.code(200).send();
+  });
+
   app.get<{ Params: IgnParams }>('/v1/characters/:ign', async (request, reply) => {
     const parsed = parseIgn(request.params.ign);
     if (parsed === null) return invalidIgn(reply);
@@ -146,16 +180,6 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     if (doc === undefined) return notFound(reply);
     reply.header('etag', etagFor(doc.updatedAt));
     return doc;
-  });
-
-  app.head<{ Params: IgnParams }>('/v1/characters/:ign', async (request, reply) => {
-    const parsed = parseIgn(request.params.ign);
-    if (parsed === null) return reply.code(400).send();
-    const summary = store.summary(parsed.key);
-    if (summary === undefined) return reply.code(404).send();
-    reply.header('etag', etagFor(summary.updatedAt));
-    reply.header('content-type', 'application/json; charset=utf-8');
-    return reply.code(200).send();
   });
 
   app.put<{ Params: IgnParams; Body: unknown }>('/v1/characters/:ign', writeLimited, async (request, reply) => {

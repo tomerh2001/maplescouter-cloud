@@ -54,7 +54,7 @@ describe('PUT + GET /v1/characters/:ign', () => {
       label: 'HTomer',
       createdAt: body.updatedAt,
       updatedAt: body.updatedAt,
-      meta: { class: '은월', level: 290, hexaStat: 2 },
+      meta: { class: '은월', level: 290, hexaStat: 2, hexaConverted: null },
       preset: samplePreset(),
     });
 
@@ -88,9 +88,9 @@ describe('PUT + GET /v1/characters/:ign', () => {
 
   it('uses client meta only as a fallback', async () => {
     await put('NoHexa', { preset: samplePreset({}, {}, {}), meta: { hexaStat: 3, class: 'ignored', level: 1 } });
-    expect((await get('NoHexa')).json()).toMatchObject({ meta: { class: '은월', level: 290, hexaStat: 3 } });
+    expect((await get('NoHexa')).json()).toMatchObject({ meta: { class: '은월', level: 290, hexaStat: 3, hexaConverted: null } });
     await put('Bare', { preset: samplePreset({}, {}, {}) });
-    expect((await get('Bare')).json()).toMatchObject({ meta: { class: '은월', level: 290, hexaStat: null } });
+    expect((await get('Bare')).json()).toMatchObject({ meta: { class: '은월', level: 290, hexaStat: null, hexaConverted: null } });
   });
 
   it('returns 404 for unknown characters', async () => {
@@ -248,7 +248,7 @@ describe('GET /v1/characters', () => {
     const { characters } = res.json() as { characters: Record<string, unknown>[] };
     expect(characters.map((c) => c.ign)).toEqual(['First', 'Second']);
     expect(Object.keys(characters[0]!).sort()).toEqual(['createdAt', 'ign', 'label', 'meta', 'updatedAt']);
-    expect(characters[1]).toMatchObject({ label: 'Alt', meta: { class: '은월', level: 250, hexaStat: 2 } });
+    expect(characters[1]).toMatchObject({ label: 'Alt', meta: { class: '은월', level: 250, hexaStat: 2, hexaConverted: null } });
 
     const limited = (await t.app.inject({ method: 'GET', url: '/v1/characters?limit=1' })).json() as { characters: unknown[] };
     expect(limited.characters).toHaveLength(1);

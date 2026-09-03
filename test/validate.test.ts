@@ -70,7 +70,7 @@ describe('validatePutBody', () => {
     const res = validatePutBody({ preset: samplePreset(), label: '  Main  ', meta: { class: 'x', level: '5', hexaStat: '3' } });
     expect(res).toEqual({
       ok: true,
-      value: expect.objectContaining({ label: 'Main', meta: { class: 'x', level: 5, hexaStat: 3 } }),
+      value: expect.objectContaining({ label: 'Main', meta: { class: 'x', level: 5, hexaStat: 3, hexaConverted: null } }),
     });
   });
 
@@ -97,8 +97,8 @@ describe('deriveMeta', () => {
     const res = validatePreset(samplePreset({}, { level: '285' }, {}));
     expect(res.ok).toBe(true);
     if (!res.ok) return;
-    expect(deriveMeta(res.value, { class: 'ignored', level: 1, hexaStat: 4 })).toEqual({ class: '은월', level: 285, hexaStat: 4 });
-    expect(deriveMeta(res.value)).toEqual({ class: '은월', level: 285, hexaStat: null });
+    expect(deriveMeta(res.value, { class: 'ignored', level: 1, hexaStat: 4, hexaConverted: null })).toEqual({ class: '은월', level: 285, hexaStat: 4, hexaConverted: null });
+    expect(deriveMeta(res.value)).toEqual({ class: '은월', level: 285, hexaStat: null, hexaConverted: null });
   });
 
   it('reads hexaStat from preset.data.hexa', () => {
@@ -116,5 +116,17 @@ describe('parseEntityTags', () => {
     expect(parseEntityTags('W/"a", "b" , c')).toEqual(['a', 'b', 'c']);
     expect(parseEntityTags('*')).toEqual(['*']);
     expect(parseEntityTags(['"a"', '"b"'])).toEqual(['a', 'b']);
+  });
+});
+
+describe('deriveMeta hexaConverted', () => {
+  it('accepts a finite positive client value and rejects junk', async () => {
+    const { deriveMeta } = await import('../src/validate.js');
+    const preset = { type: 'maplescouter-manual-preset', v: 1, data: { stat: { myClass: '은월', level: '290' }, hexa: { hexaStat: 2 } } } as never;
+    expect(deriveMeta(preset, { hexaConverted: 112289.6 }).hexaConverted).toBe(112290);
+    expect(deriveMeta(preset, { hexaConverted: 0 }).hexaConverted).toBeNull();
+    expect(deriveMeta(preset, { hexaConverted: Number.NaN }).hexaConverted).toBeNull();
+    expect(deriveMeta(preset, { hexaConverted: '5' as never }).hexaConverted).toBeNull();
+    expect(deriveMeta(preset).hexaConverted).toBeNull();
   });
 });

@@ -19,6 +19,8 @@ export interface CharacterMeta {
   class: string;
   level: number;
   hexaStat: number | null;
+  /** The site's HEXA-converted main stat (Boss 300 HEXA), client-supplied; null when never computed. */
+  hexaConverted: number | null;
 }
 
 export interface CharacterDoc {

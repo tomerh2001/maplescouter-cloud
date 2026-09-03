@@ -117,5 +117,8 @@ export function deriveMeta(preset: Preset, client?: Partial<CharacterMeta>): Cha
   const cls = typeof stat.myClass === 'string' && stat.myClass.trim() !== '' ? stat.myClass : (client?.class ?? '');
   const level = parseLevel(stat.level) ?? client?.level ?? 0;
   const hexaStat = parseHexaStat(hexa.hexaStat) ?? (client?.hexaStat == null ? null : parseHexaStat(client.hexaStat));
-  return { class: cls, level, hexaStat };
+  // Only the client knows the converted stat (the site computes it in the browser); accept a finite positive number.
+  const hc = client?.hexaConverted;
+  const hexaConverted = typeof hc === 'number' && Number.isFinite(hc) && hc > 0 ? Math.round(hc) : null;
+  return { class: cls, level, hexaStat, hexaConverted };
 }

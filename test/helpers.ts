@@ -1,0 +1,67 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import pino from 'pino';
+import { buildApp, type App } from '../src/app.js';
+import { loadConfig, type Config } from '../src/config.js';
+import { CharacterStore } from '../src/store.js';
+
+export const silentLogger = pino({ level: 'silent' });
+
+export async function tempDir(): Promise<string> {
+  return mkdtemp(path.join(os.tmpdir(), 'maplescouter-cloud-'));
+}
+
+/** A preset shaped like a real maplescouter.com export (13 userStat sections). */
+export function samplePreset(
+  overrides: Record<string, unknown> = {},
+  stat: Record<string, unknown> = {},
+  hexa: Record<string, unknown> = { hexaStat: 2 },
+): Record<string, unknown> {
+  return {
+    type: 'maplescouter-manual-preset',
+    v: 1,
+    savedAt: '2026-09-01T12:00:00.000Z',
+    label: 'HTomer',
+    data: {
+      doping: {},
+      linkSkill: {},
+      special: {},
+      stat: { myClass: '은월', level: '290', mainStatBase: '50000', ...stat },
+      hexa,
+      seedRing: {},
+      entireStat: {},
+      isGMS: true,
+      isTMS: false,
+      isJMS: false,
+      isMSEA: false,
+      power: {},
+      huntSkill: {},
+    },
+    ...overrides,
+  };
+}
+
+export interface TestApp {
+  app: App;
+  store: CharacterStore;
+  dir: string;
+  close(): Promise<void>;
+}
+
+export async function makeApp(overrides: Partial<Config> = {}): Promise<TestApp> {
+  const dir = await tempDir();
+  const config: Config = { ...loadConfig({}), dataDir: dir, logLevel: 'silent', ...overrides };
+  const store = await CharacterStore.open(dir, silentLogger);
+  const app = await buildApp({ config, store, logger: silentLogger });
+  await app.ready();
+  return {
+    app,
+    store,
+    dir,
+    close: async () => {
+      await app.close();
+      await rm(dir, { recursive: true, force: true });
+    },
+  };
+}

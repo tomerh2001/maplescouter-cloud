@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import pino from 'pino';
 import { buildApp, type App } from '../src/app.js';
+import type { FetchImpl } from '../src/avatar.js';
 import { loadConfig, type Config } from '../src/config.js';
 import { CharacterStore } from '../src/store.js';
 
@@ -49,11 +50,19 @@ export interface TestApp {
   close(): Promise<void>;
 }
 
-export async function makeApp(overrides: Partial<Config> = {}): Promise<TestApp> {
-  const dir = await tempDir();
+export interface MakeAppOptions {
+  /** Stub for the avatar route's upstream fetch. Tests that hit /v1/avatar must pass one (no network). */
+  fetchImpl?: FetchImpl;
+  /** Reuse an existing data directory (kept on close) instead of a fresh temp one. */
+  dir?: string;
+}
+
+export async function makeApp(overrides: Partial<Config> = {}, opts: MakeAppOptions = {}): Promise<TestApp> {
+  const ownDir = opts.dir === undefined;
+  const dir = opts.dir ?? (await tempDir());
   const config: Config = { ...loadConfig({}), dataDir: dir, logLevel: 'silent', ...overrides };
   const store = await CharacterStore.open(dir, silentLogger, { maxCharacters: config.maxCharacters });
-  const app = await buildApp({ config, store, logger: silentLogger });
+  const app = await buildApp({ config, store, logger: silentLogger, fetchImpl: opts.fetchImpl });
   await app.ready();
   return {
     app,
@@ -61,7 +70,7 @@ export async function makeApp(overrides: Partial<Config> = {}): Promise<TestApp>
     dir,
     close: async () => {
       await app.close();
-      await rm(dir, { recursive: true, force: true });
+      if (ownDir) await rm(dir, { recursive: true, force: true });
     },
   };
 }

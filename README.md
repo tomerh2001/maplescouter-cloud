@@ -12,6 +12,7 @@ Live instance: `https://scouter.tomerh2001.com`
 - File-backed store: `DATA_DIR/characters/<ign>.json`, written atomically (temp file + fsync + rename). No database.
 - In-memory index rebuilt from the directory on boot; list and `HEAD` never touch the disk.
 - Optimistic concurrency via `ETag` / `If-Match`.
+- A small avatar route proxies Nexon's public GMS ranking API (the browser cannot call it directly) and caches the result.
 - Node 20, TypeScript, Fastify 5, pino JSON logs on stdout.
 
 ## API
@@ -26,6 +27,7 @@ Base URL: `https://scouter.tomerh2001.com`. Every response is JSON. CORS is open
 | `HEAD` | `/v1/characters/:ign` | Headers only | Cheap sync polling; same `ETag` |
 | `PUT` | `/v1/characters/:ign` | Create or replace | Body `{ preset, label?, meta? }`; optional `If-Match`; `201` created / `200` updated |
 | `DELETE` | `/v1/characters/:ign` | Delete | Requires header `X-Confirm: <ign>`; returns `204` |
+| `GET` | `/v1/avatar/:ign` | Character look from the GMS rankings | Image URL, level, job, world; cached, `Cache-Control: public, max-age=3600` |
 
 ### IGN rules
 
@@ -71,6 +73,27 @@ Validation:
 
 Concurrency: send `If-Match: "<updatedAt>"` (the `ETag` you last saw). If the stored `updatedAt` differs you get `409 { "error": "conflict", "updatedAt": "<current or null>" }` and nothing is written.
 
+### Avatar: `GET /v1/avatar/:ign`
+
+Looks the IGN up on Nexon's public GMS ranking API (`.../ranking/v2/na`, overall weekly board, regular worlds first, then Heroic worlds) and returns the character's current look. Nexon sends no CORS headers, so the extension cannot ask Nexon from maplescouter.com; this route proxies it. It has nothing to do with the stored presets: an IGN can have an avatar and no document, or the other way round.
+
+```json
+{
+  "ign": "HTomer",
+  "level": 291,
+  "job": "Shade",
+  "worldId": 1,
+  "image": "https://msavatar1.nexon.net/Character/....png",
+  "fetchedAt": "2026-09-03T22:29:57.013Z"
+}
+```
+
+- `ign` is spelled the way Nexon has it. `image` is a 96x96 PNG served by Nexon (no CSP on maplescouter.com, so `<img src>` works).
+- `404 { "error": "not_found" }` when the character is on neither board. `502 { "error": "upstream" }` when Nexon fails and nothing is cached.
+- Cache: in memory, keyed by the lowercase IGN. Hits are reused for 24 h, misses for 1 h (`AVATAR_HIT_TTL_MS`, `AVATAR_MISS_TTL_MS`). Hits are written to `DATA_DIR/avatars.json` (atomic temp file + rename) and loaded on boot, so a restart does not refetch. If Nexon fails while an expired hit is cached, the stale hit is served. Expired hits are kept for that purpose for 7 days, then dropped from memory and from the file. At most 20 000 entries; the oldest are dropped.
+- Concurrent requests for one IGN share a single upstream call. Each upstream call has an 8 s timeout and sends the User-Agent `Mozilla/5.0 (compatible; maplescouter-cloud/1.0; +https://github.com/tomerh2001/maplescouter-cloud)`.
+- `200` and `404` carry `Cache-Control: public, max-age=3600` (every other route is `no-store`). Counted by the read rate limit.
+
 ### Errors
 
 | Status | `error` | When |
@@ -84,6 +107,7 @@ Concurrency: send `If-Match: "<updatedAt>"` (the `ETag` you last saw). If the st
 | 413 | `payload_too_large` | Body over 256 KB |
 | 415 | `unsupported_media_type` | Missing `Content-Type: application/json` |
 | 429 | `rate_limited` | See below; `Retry-After` header is set |
+| 502 | `upstream` | `GET /v1/avatar/:ign` only: Nexon did not answer and there is no cached look for that IGN |
 | 507 | `storage_full` | The store holds `MAX_CHARACTERS` characters and this IGN is new. Overwriting an existing IGN still works |
 
 ### Rate limits (hygiene, not auth)
@@ -121,6 +145,9 @@ curl -s -X PUT "$BASE/v1/characters/HTomer" \
 # list everyone
 curl -s "$BASE/v1/characters"
 
+# character look (image URL, level, job, world) from the GMS rankings
+curl -s "$BASE/v1/avatar/HTomer"
+
 # delete (must confirm with the IGN)
 curl -s -X DELETE "$BASE/v1/characters/HTomer" -H 'X-Confirm: HTomer' -o /dev/null -w '%{http_code}\n'
 
@@ -139,7 +166,7 @@ All via environment variables.
 | --- | --- | --- |
 | `PORT` | `8080` | Listen port |
 | `HOST` | `0.0.0.0` | Bind address |
-| `DATA_DIR` | `/data` | Store root; documents live in `DATA_DIR/characters/` |
+| `DATA_DIR` | `/data` | Store root; documents live in `DATA_DIR/characters/`, the avatar cache in `DATA_DIR/avatars.json` |
 | `LOG_LEVEL` | `info` | pino level |
 | `LOG_PRETTY` | `false` | Human-readable logs (dev only; needs `pino-pretty`) |
 | `TRUST_PROXY` | `true` | Trust one proxy hop (traefik) for `X-Forwarded-*`. With `false` no forwarding header is read at all and the socket address is the client |
@@ -148,12 +175,15 @@ All via environment variables.
 | `READ_RATE_LIMIT` | `600` | Reads per minute per IP |
 | `WRITE_RATE_LIMIT` | `60` | Writes per minute per IP, per endpoint |
 | `MAX_CHARACTERS` | `20000` | Max stored characters. New IGNs past this get `507`, so one client cannot fill the disk |
+| `AVATAR_HIT_TTL_MS` | `86400000` | How long a found avatar is reused before asking Nexon again (24 h) |
+| `AVATAR_MISS_TTL_MS` | `3600000` | How long a "not found" avatar answer is reused (1 h) |
+| `AVATAR_UPSTREAM` | `https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na` | Ranking API base URL the avatar route proxies. Only worth changing to point at a stub |
 
 ## Development
 
 ```bash
 npm ci
-npm test          # vitest: store unit tests + route tests via fastify.inject
+npm test          # vitest: store unit tests + route tests via fastify.inject (the avatar route runs against a stubbed fetch, no network)
 npm run build     # tsc -> dist/
 npm run dev       # build, then serve on :8080 with DATA_DIR=./tmp/data and pretty logs
 ```
@@ -162,6 +192,7 @@ Layout:
 
 - `src/store.ts`: file-backed atomic store + in-memory index.
 - `src/validate.ts`: IGN / preset / body validation and `meta` derivation.
+- `src/avatar.ts`: Nexon ranking look-up, avatar cache, `avatars.json` persistence, in-flight dedupe.
 - `src/app.ts`: Fastify app (routes, CORS, rate limits, error mapping).
 - `src/server.ts`: entrypoint with graceful shutdown.
 - `test/`: vitest suites.

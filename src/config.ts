@@ -1,3 +1,5 @@
+import { DEFAULT_AVATAR_HIT_TTL_MS, DEFAULT_AVATAR_MISS_TTL_MS, DEFAULT_AVATAR_UPSTREAM } from './avatar.js';
+
 export interface Config {
   port: number;
   host: string;
@@ -16,10 +18,17 @@ export interface Config {
   writeRateLimit: number;
   /** Max stored characters. Creating a new one past this cap is refused with 507; overwrites still work. */
   maxCharacters: number;
+  /** How long a successful avatar look-up is reused before asking Nexon again. */
+  avatarHitTtlMs: number;
+  /** How long a "no such character" avatar look-up is reused. */
+  avatarMissTtlMs: number;
+  /** Base URL of the ranking API the avatar route proxies (tests point it at a stub). */
+  avatarUpstream: string;
 }
 
 export const DEFAULT_BODY_LIMIT = 256 * 1024;
 export const DEFAULT_MAX_CHARACTERS = 20_000;
+
 
 function intEnv(raw: string | undefined, fallback: number): number {
   if (raw === undefined || raw.trim() === '') return fallback;
@@ -45,5 +54,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     readRateLimit: intEnv(env.READ_RATE_LIMIT, 600),
     writeRateLimit: intEnv(env.WRITE_RATE_LIMIT, 60),
     maxCharacters: intEnv(env.MAX_CHARACTERS, DEFAULT_MAX_CHARACTERS),
+    avatarHitTtlMs: intEnv(env.AVATAR_HIT_TTL_MS, DEFAULT_AVATAR_HIT_TTL_MS),
+    avatarMissTtlMs: intEnv(env.AVATAR_MISS_TTL_MS, DEFAULT_AVATAR_MISS_TTL_MS),
+    avatarUpstream: env.AVATAR_UPSTREAM?.trim() || DEFAULT_AVATAR_UPSTREAM,
   };
 }

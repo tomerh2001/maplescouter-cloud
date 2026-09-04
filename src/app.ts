@@ -4,6 +4,7 @@ import Fastify, { LogController, type FastifyReply } from 'fastify';
 import { Address6 } from 'ip-address';
 import { isIPv6 } from 'node:net';
 import type { Logger } from 'pino';
+import { AvatarService, type FetchImpl } from './avatar.js';
 import type { Config } from './config.js';
 import { parseIgn } from './ign.js';
 import { CharacterStore, DEFAULT_LIST_LIMIT, MAX_LIST_LIMIT } from './store.js';
@@ -13,6 +14,8 @@ export interface AppOptions {
   config: Config;
   store: CharacterStore;
   logger: Logger;
+  /** Upstream HTTP client for the avatar route. Defaults to `globalThis.fetch`; tests inject a stub. */
+  fetchImpl?: FetchImpl;
 }
 
 const ONE_MINUTE_MS = 60_000;
@@ -104,7 +107,16 @@ function invalidIgn(reply: FastifyReply): FastifyReply {
 /** The concrete Fastify instance type (its logger generic is pino's Logger). */
 export type App = Awaited<ReturnType<typeof buildApp>>;
 
-export async function buildApp({ config, store, logger }: AppOptions) {
+export async function buildApp({ config, store, logger, fetchImpl }: AppOptions) {
+  const avatars = await AvatarService.open({
+    dataDir: config.dataDir,
+    fetchImpl,
+    upstream: config.avatarUpstream,
+    hitTtlMs: config.avatarHitTtlMs,
+    missTtlMs: config.avatarMissTtlMs,
+    log: logger,
+  });
+
   const app = Fastify({
     loggerInstance: logger,
     // Fastify's stock request lines print the concrete URL (which carries the IGN) and `request.ip`,
@@ -155,6 +167,10 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     );
   });
 
+  app.addHook('onClose', async () => {
+    await avatars.flush();
+  });
+
   app.setNotFoundHandler((_request, reply) => notFound(reply));
 
   app.setErrorHandler((error: unknown, request, reply) => {
@@ -177,7 +193,7 @@ export async function buildApp({ config, store, logger }: AppOptions) {
   app.get('/', { config: NO_RATE_LIMIT }, async () => ({
     service: 'maplescouter-cloud',
     docs: REPO_URL,
-    endpoints: ['GET /healthz', 'GET /v1/characters', 'GET|HEAD|PUT|DELETE /v1/characters/:ign'],
+    endpoints: ['GET /healthz', 'GET /v1/characters', 'GET|HEAD|PUT|DELETE /v1/characters/:ign', 'GET /v1/avatar/:ign'],
   }));
 
   app.get('/healthz', { config: NO_RATE_LIMIT }, async () => ({ ok: true, characters: store.size() }));
@@ -259,6 +275,18 @@ export async function buildApp({ config, store, logger }: AppOptions) {
     const removed = await store.delete(parsed.key);
     if (!removed) return notFound(reply);
     return reply.code(204).send();
+  });
+
+  // Character look (image, level, job) proxied from Nexon's ranking API and cached (see avatar.ts).
+  // 200 and 404 are cacheable for an hour, overriding the no-store default; 502 stays no-store.
+  app.get<{ Params: IgnParams }>('/v1/avatar/:ign', async (request, reply) => {
+    const parsed = parseIgn(request.params.ign);
+    if (parsed === null) return invalidIgn(reply);
+    const result = await avatars.lookup(parsed.ign);
+    if (result.status === 'error') return reply.code(502).send({ error: 'upstream' });
+    reply.header('cache-control', 'public, max-age=3600');
+    if (result.status === 'miss') return notFound(reply);
+    return result.avatar;
   });
 
   return app;

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- build: compile TypeScript with the full dependency set ----
-FROM node:20-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -10,13 +10,13 @@ COPY src ./src
 RUN npm run build
 
 # ---- deps: production dependencies only ----
-FROM node:20-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund
 
 # ---- runtime ----
-FROM node:20-alpine
+FROM node:26-alpine
 LABEL org.opencontainers.image.source="https://github.com/tomerh2001/maplescouter-cloud" \
       org.opencontainers.image.description="MapleScouter Cloud: IGN-keyed preset sync API" \
       org.opencontainers.image.licenses="MIT"

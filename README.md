@@ -1,1 +1,248 @@
-IyBNYXBsZVNjb3V0ZXIgQ2xvdWQKClRpbnkgY2xvdWQtc2F2ZSBiYWNrZW5kIGZvciB0aGUgW01hcGxlU2NvdXRlciBFbmhhbmNlbWVudHNdKGh0dHBzOi8vZ2l0aHViLmNvbS90b21lcmgyMDAxL21hcGxlc2NvdXRlci1lbmhhbmNlbWVudHMpIHVzZXJzY3JpcHQgYW5kIGV4dGVuc2lvbi4KSXQgc3RvcmVzIENoYXJhY3RlciBwYWdlIHByZXNldHMgZnJvbSBbbWFwbGVzY291dGVyLmNvbV0oaHR0cHM6Ly9tYXBsZXNjb3V0ZXIuY29tKSwga2V5ZWQgYnkgSUdOLCBzbyBhIGNoYXJhY3RlciBjYW4gYmUgc3luY2VkIGJldHdlZW4gYnJvd3NlcnMgYW5kIGRldmljZXMuCgpMaXZlIGluc3RhbmNlOiBgaHR0cHM6Ly9zY291dGVyLnRvbWVyaDIwMDEuY29tYAoKIyMgSG93IGl0IHdvcmtzCgotIE9uZSBKU09OIGRvY3VtZW50IHBlciBjaGFyYWN0ZXIsIGtleWVkIGJ5IHRoZSBJR04gbG93ZXJjYXNlZC4KLSBObyBhY2NvdW50cyBhbmQgbm8gdG9rZW5zLiAqKkFueW9uZSBjYW4gcmVhZCBvciBvdmVyd3JpdGUgYW55IElHTi4qKiBJdCBpcyBhIGNvbnZlbmllbmNlIHN5bmMsIG5vdCBhIHZhdWx0LgotIEZpbGUtYmFja2VkIHN0b3JlOiBgREFUQV9ESVIvY2hhcmFjdGVycy88aWduPi5qc29uYCwgd3JpdHRlbiBhdG9taWNhbGx5ICh0ZW1wIGZpbGUgKyBmc3luYyArIHJlbmFtZSkuIE5vIGRhdGFiYXNlLgotIEluLW1lbW9yeSBpbmRleCByZWJ1aWx0IGZyb20gdGhlIGRpcmVjdG9yeSBvbiBib290OyBsaXN0IGFuZCBgSEVBRGAgbmV2ZXIgdG91Y2ggdGhlIGRpc2suCi0gT3B0aW1pc3RpYyBjb25jdXJyZW5jeSB2aWEgYEVUYWdgIC8gYElmLU1hdGNoYC4KLSBBIHNtYWxsIGF2YXRhciByb3V0ZSBwcm94aWVzIE5leG9uJ3MgcHVibGljIEdNUyByYW5raW5nIEFQSSAodGhlIGJyb3dzZXIgY2Fubm90IGNhbGwgaXQgZGlyZWN0bHkpIGFuZCBjYWNoZXMgdGhlIHJlc3VsdC4KLSBOb2RlIDIwLCBUeXBlU2NyaXB0LCBGYXN0aWZ5IDUsIHBpbm8gSlNPTiBsb2dzIG9uIHN0ZG91dC4KCiMjIEFQSQoKQmFzZSBVUkw6IGBodHRwczovL3Njb3V0ZXIudG9tZXJoMjAwMS5jb21gLiBFdmVyeSByZXNwb25zZSBpcyBKU09OLiBDT1JTIGlzIG9wZW4gKGBBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW46ICpgKS4KCnwgTWV0aG9kIHwgUGF0aCB8IFB1cnBvc2UgfCBOb3RlcyB8CnwgLS0tIHwgLS0tIHwgLS0tIHwgLS0tIHwKfCBgR0VUYCB8IGAvaGVhbHRoemAgfCBMaXZlbmVzcyArIGNoYXJhY3RlciBjb3VudCB8IGB7ICJvayI6IHRydWUsICJjaGFyYWN0ZXJzIjogTiB9YCB8CnwgYEdFVGAgfCBgL3YxL2NoYXJhY3RlcnNgIHwgTGlzdCBzdW1tYXJpZXMsIG5ld2VzdCBmaXJzdCB8IENhcCA1MDAsIG9wdGlvbmFsIGA/bGltaXQ9TmAgfAp8IGBHRVRgIHwgYC92MS9jaGFyYWN0ZXJzLzppZ25gIHwgRnVsbCBkb2N1bWVudCB8IGBFVGFnOiAiPHVwZGF0ZWRBdD4iYCwgaG9ub3VycyBgSWYtTm9uZS1NYXRjaGAgKDMwNCkgfAp8IGBIRUFEYCB8IGAvdjEvY2hhcmFjdGVycy86aWduYCB8IEhlYWRlcnMgb25seSB8IENoZWFwIHN5bmMgcG9sbGluZzsgc2FtZSBgRVRhZ2AgfAp8IGBQVVRgIHwgYC92MS9jaGFyYWN0ZXJzLzppZ25gIHwgQ3JlYXRlIG9yIHJlcGxhY2UgfCBCb2R5IGB7IHByZXNldCwgbGFiZWw/LCBtZXRhPyB9YDsgb3B0aW9uYWwgYElmLU1hdGNoYDsgYDIwMWAgY3JlYXRlZCAvIGAyMDBgIHVwZGF0ZWQgfAp8IGBERUxFVEVgIHwgYC92MS9jaGFyYWN0ZXJzLzppZ25gIHwgRGVsZXRlIHwgUmVxdWlyZXMgaGVhZGVyIGBYLUNvbmZpcm06IDxpZ24+YDsgcmV0dXJucyBgMjA0YCB8CnwgYEdFVGAgfCBgL3YxL2F2YXRhci86aWduYCB8IENoYXJhY3RlciBsb29rIGZyb20gdGhlIEdNUyByYW5raW5ncyB8IEltYWdlIFVSTCwgbGV2ZWwsIGpvYiwgd29ybGQ7IGNhY2hlZCwgYENhY2hlLUNvbnRyb2w6IHB1YmxpYywgbWF4LWFnZT0zNjAwYCB8CgojIyMgSUdOIHJ1bGVzCgotIE11c3QgbWF0Y2ggYF5bQS1aYS16MC05XXsxLDE2fSRgLgotIExvb2t1cHMgYXJlIGNhc2UtaW5zZW5zaXRpdmUgKGBIVG9tZXJgIGFuZCBgaHRvbWVyYCBhcmUgdGhlIHNhbWUgY2hhcmFjdGVyKS4KLSBUaGUgZGlzcGxheSBjYXNlIG9mIHRoZSBtb3N0IHJlY2VudCBgUFVUYCBpcyBrZXB0IGluIGBpZ25gLgoKIyMjIERvY3VtZW50CgpgYGBqc29uCnsKICAiaWduIjogIkhUb21lciIsCiAgImxhYmVsIjogIkhUb21lciIsCiAgImNyZWF0ZWRBdCI6ICIyMDI2LTA5LTAxVDEyOjAwOjAwLjAwMFoiLAogICJ1cGRhdGVkQXQiOiAiMjAyNi0wOS0wM1QwODoxNTo0Mi4xMTdaIiwKICAibWV0YSI6IHsgImNsYXNzIjogIuydgOyblCIsICJsZXZlbCI6IDI5MCwgImhleGFTdGF0IjogMiB9LAogICJwcmVzZXQiOiB7CiAgICAidHlwZSI6ICJtYXBsZXNjb3V0ZXItbWFudWFsLXByZXNldCIsCiAgICAidiI6IDEsCiAgICAic2F2ZWRBdCI6ICIyMDI2LTA5LTAzVDA4OjE1OjQxLjAwMFoiLAogICAgImxhYmVsIjogIkhUb21lciIsCiAgICAiZGF0YSI6IHsgInN0YXQiOiB7ICJteUNsYXNzIjogIuydgOyblCIsICJsZXZlbCI6ICIyOTAiIH0sICJoZXhhIjogeyAiaGV4YVN0YXQiOiAyIH0sICJkb3BpbmciOiB7fSwgImxpbmtTa2lsbCI6IHt9IH0KICB9Cn0KYGBgCgpgbWV0YWAgaXMgZGVyaXZlZCBvbiB0aGUgc2VydmVyIGZyb20gYHByZXNldC5kYXRhLnN0YXQubXlDbGFzc2AsIGBwcmVzZXQuZGF0YS5zdGF0LmxldmVsYCBhbmQgYHByZXNldC5kYXRhLmhleGEuaGV4YVN0YXRgLgpBIGNsaWVudC1zZW50IGBtZXRhYCBvbmx5IGZpbGxzIGdhcHMgKGZvciBleGFtcGxlIGBoZXhhU3RhdGAgd2hlbiB0aGUgcHJlc2V0IGhhcyBub25lKS4gYGhleGFTdGF0YCBpcyBgbnVsbGAgd2hlbiB1bmtub3duLgoKIyMjIFBVVCBib2R5CgpgYGBqc29uCnsgInByZXNldCI6IHsgInR5cGUiOiAibWFwbGVzY291dGVyLW1hbnVhbC1wcmVzZXQiLCAidiI6IDEsICJzYXZlZEF0IjogIi4uLiIsICJsYWJlbCI6ICIuLi4iLCAiZGF0YSI6IHsgfSB9LCAibGFiZWwiOiAib3B0aW9uYWwiLCAibWV0YSI6IHsgImhleGFTdGF0IjogMiB9IH0KYGBgCgpWYWxpZGF0aW9uOgoKLSBgcHJlc2V0LnR5cGVgIG11c3QgYmUgYG1hcGxlc2NvdXRlci1tYW51YWwtcHJlc2V0YCwgYHByZXNldC52YCBtdXN0IGJlIGAxYC4KLSBgcHJlc2V0LmRhdGFgIG11c3QgYmUgYW4gb2JqZWN0IGNvbnRhaW5pbmcgYHN0YXRgLCBgaGV4YWAsIGBkb3BpbmdgLCBgbGlua1NraWxsYCBvYmplY3RzLgotIGBwcmVzZXQuZGF0YS5zdGF0Lm15Q2xhc3NgOiBub24tZW1wdHkgc3RyaW5nLiBgcHJlc2V0LmRhdGEuc3RhdC5sZXZlbGA6IGludGVnZXIgMC4uMzAwIChudW1lcmljIHN0cmluZyBvciBudW1iZXIpLgotIGBsYWJlbGA6IG9wdGlvbmFsIHN0cmluZywgdHJpbW1lZCwgbWF4IDY0IGNoYXJzLiBEZWZhdWx0cyB0byB0aGUgSUdOLgotIEJvZHkgbGltaXQgMjU2IEtCLiBVbmtub3duIGtleXMgaW5zaWRlIHRoZSBgcHJlc2V0YCBlbnZlbG9wZSBhcmUgZHJvcHBlZDsgYHByZXNldC5kYXRhYCBpcyBzdG9yZWQgdmVyYmF0aW0uCgpDb25jdXJyZW5jeTogc2VuZCBgSWYtTWF0Y2g6ICI8dXBkYXRlZEF0PiJgICh0aGUgYEVUYWdgIHlvdSBsYXN0IHNhdykuIElmIHRoZSBzdG9yZWQgYHVwZGF0ZWRBdGAgZGlmZmVycyB5b3UgZ2V0IGA0MDkgeyAiZXJyb3IiOiAiY29uZmxpY3QiLCAidXBkYXRlZEF0IjogIjxjdXJyZW50IG9yIG51bGw+IiB9YCBhbmQgbm90aGluZyBpcyB3cml0dGVuLgoKIyMjIEF2YXRhcjogYEdFVCAvdjEvYXZhdGFyLzppZ25gCgpMb29rcyB0aGUgSUdOIHVwIG9uIE5leG9uJ3MgcHVibGljIEdNUyByYW5raW5nIEFQSSAoYC4uLi9yYW5raW5nL3YyL25hYCwgb3ZlcmFsbCB3ZWVrbHkgYm9hcmQsIHJlZ3VsYXIgd29ybGRzIGZpcnN0LCB0aGVuIEhlcm9pYyB3b3JsZHMpIGFuZCByZXR1cm5zIHRoZSBjaGFyYWN0ZXIncyBjdXJyZW50IGxvb2suIE5leG9uIHNlbmRzIG5vIENPUlMgaGVhZGVycywgc28gdGhlIGV4dGVuc2lvbiBjYW5ub3QgYXNrIE5leG9uIGZyb20gbWFwbGVzY291dGVyLmNvbTsgdGhpcyByb3V0ZSBwcm94aWVzIGl0LiBJdCBoYXMgbm90aGluZyB0byBkbyB3aXRoIHRoZSBzdG9yZWQgcHJlc2V0czogYW4gSUdOIGNhbiBoYXZlIGFuIGF2YXRhciBhbmQgbm8gZG9jdW1lbnQsIG9yIHRoZSBvdGhlciB3YXkgcm91bmQuCgpgYGBqc29uCnsKICAiaWduIjogIkhUb21lciIsCiAgImxldmVsIjogMjkxLAogICJqb2IiOiAiU2hhZGUiLAogICJ3b3JsZElkIjogMSwKICAiaW1hZ2UiOiAiaHR0cHM6Ly9tc2F2YXRhcjEubmV4b24ubmV0L0NoYXJhY3Rlci8uLi4ucG5nIiwKICAiZmV0Y2hlZEF0IjogIjIwMjYtMDktMDNUMjI6Mjk6NTcuMDEzWiIKfQpgYGAKCi0gYGlnbmAgaXMgc3BlbGxlZCB0aGUgd2F5IE5leG9uIGhhcyBpdC4gYGltYWdlYCBpcyBhIDk2eDk2IFBORyBzZXJ2ZWQgYnkgTmV4b24gKG5vIENTUCBvbiBtYXBsZXNjb3V0ZXIuY29tLCBzbyBgPGltZyBzcmM+YCB3b3JrcykuCi0gYDQwNCB7ICJlcnJvciI6ICJub3RfZm91bmQiIH1gIHdoZW4gdGhlIGNoYXJhY3RlciBpcyBvbiBuZWl0aGVyIGJvYXJkLiBgNTAyIHsgImVycm9yIjogInVwc3RyZWFtIiB9YCB3aGVuIE5leG9uIGZhaWxzIGFuZCBub3RoaW5nIGlzIGNhY2hlZC4KLSBDYWNoZTogaW4gbWVtb3J5LCBrZXllZCBieSB0aGUgbG93ZXJjYXNlIElHTi4gSGl0cyBhcmUgcmV1c2VkIGZvciAyNCBoLCBtaXNzZXMgZm9yIDEgaCAoYEFWQVRBUl9ISVRfVFRMX01TYCwgYEFWQVRBUl9NSVNTX1RUTF9NU2ApLiBIaXRzIGFyZSB3cml0dGVuIHRvIGBEQVRBX0RJUi9hdmF0YXJzLmpzb25gIChhdG9taWMgdGVtcCBmaWxlICsgcmVuYW1lKSBhbmQgbG9hZGVkIG9uIGJvb3QsIHNvIGEgcmVzdGFydCBkb2VzIG5vdCByZWZldGNoLiBJZiBOZXhvbiBmYWlscyB3aGlsZSBhbiBleHBpcmVkIGhpdCBpcyBjYWNoZWQsIHRoZSBzdGFsZSBoaXQgaXMgc2VydmVkLiBFeHBpcmVkIGhpdHMgYXJlIGtlcHQgZm9yIHRoYXQgcHVycG9zZSBmb3IgNyBkYXlzLCB0aGVuIGRyb3BwZWQgZnJvbSBtZW1vcnkgYW5kIGZyb20gdGhlIGZpbGUuIEF0IG1vc3QgMjAgMDAwIGVudHJpZXM7IHRoZSBvbGRlc3QgYXJlIGRyb3BwZWQuCi0gQ29uY3VycmVudCByZXF1ZXN0cyBmb3Igb25lIElHTiBzaGFyZSBhIHNpbmdsZSB1cHN0cmVhbSBjYWxsLiBFYWNoIHVwc3RyZWFtIGNhbGwgaGFzIGFuIDggcyB0aW1lb3V0IGFuZCBzZW5kcyB0aGUgVXNlci1BZ2VudCBgTW96aWxsYS81LjAgKGNvbXBhdGlibGU7IG1hcGxlc2NvdXRlci1jbG91ZC8xLjA7ICtodHRwczovL2dpdGh1Yi5jb20vdG9tZXJoMjAwMS9tYXBsZXNjb3V0ZXItY2xvdWQpYC4KLSBgMjAwYCBhbmQgYDQwNGAgY2FycnkgYENhY2hlLUNvbnRyb2w6IHB1YmxpYywgbWF4LWFnZT0zNjAwYCAoZXZlcnkgb3RoZXIgcm91dGUgaXMgYG5vLXN0b3JlYCkuIENvdW50ZWQgYnkgdGhlIHJlYWQgcmF0ZSBsaW1pdC4KCiMjIyBFcnJvcnMKCnwgU3RhdHVzIHwgYGVycm9yYCB8IFdoZW4gfAp8IC0tLSB8IC0tLSB8IC0tLSB8CnwgNDAwIHwgYGludmFsaWRfaWduYCB8IElHTiBmYWlscyB0aGUgcmVnZXggfAp8IDQwMCB8IGBpbnZhbGlkX2JvZHlgIHwgVmFsaWRhdGlvbiBmYWlsZWQgKGBkZXRhaWxgIHNheXMgd2h5KSB8CnwgNDAwIHwgYGludmFsaWRfanNvbmAgfCBCb2R5IGlzIG5vdCB2YWxpZCBKU09OIHwKfCA0MDAgfCBgY29uZmlybV9yZXF1aXJlZGAgfCBgREVMRVRFYCB3aXRob3V0IGEgbWF0Y2hpbmcgYFgtQ29uZmlybWAgfAp8IDQwNCB8IGBub3RfZm91bmRgIHwgVW5rbm93biBjaGFyYWN0ZXIgb3Igcm91dGUgfAp8IDQwOSB8IGBjb25mbGljdGAgfCBgSWYtTWF0Y2hgIG1pc21hdGNoIChgdXBkYXRlZEF0YCA9IGN1cnJlbnQgdmFsdWUsIG9yIGBudWxsYCkgfAp8IDQxMyB8IGBwYXlsb2FkX3Rvb19sYXJnZWAgfCBCb2R5IG92ZXIgMjU2IEtCIHwKfCA0MTUgfCBgdW5zdXBwb3J0ZWRfbWVkaWFfdHlwZWAgfCBNaXNzaW5nIGBDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb25gIHwKfCA0MjkgfCBgcmF0ZV9saW1pdGVkYCB8IFNlZSBiZWxvdzsgYFJldHJ5LUFmdGVyYCBoZWFkZXIgaXMgc2V0IHwKfCA1MDIgfCBgdXBzdHJlYW1gIHwgYEdFVCAvdjEvYXZhdGFyLzppZ25gIG9ubHk6IE5leG9uIGRpZCBub3QgYW5zd2VyIGFuZCB0aGVyZSBpcyBubyBjYWNoZWQgbG9vayBmb3IgdGhhdCBJR04gfAp8IDUwNyB8IGBzdG9yYWdlX2Z1bGxgIHwgVGhlIHN0b3JlIGhvbGRzIGBNQVhfQ0hBUkFDVEVSU2AgY2hhcmFjdGVycyBhbmQgdGhpcyBJR04gaXMgbmV3LiBPdmVyd3JpdGluZyBhbiBleGlzdGluZyBJR04gc3RpbGwgd29ya3MgfAoKIyMjIFJhdGUgbGltaXRzIChoeWdpZW5lLCBub3QgYXV0aCkKCi0gUmVhZHMgKGBHRVRgL2BIRUFEYCk6IDYwMCBwZXIgbWludXRlIHBlciBJUCwgc2hhcmVkIGFjcm9zcyByZWFkIGVuZHBvaW50cy4KLSBXcml0ZXMgKGBQVVRgLCBgREVMRVRFYCk6IDYwIHBlciBtaW51dGUgcGVyIElQLCBwZXIgZW5kcG9pbnQuCi0gYC9oZWFsdGh6YCwgYC9gIGFuZCBDT1JTIHByZWZsaWdodHMgYXJlIG5ldmVyIGxpbWl0ZWQuCi0gVGhlIGNsaWVudCBJUCBpcyBgQ0YtQ29ubmVjdGluZy1JUGAgKHNldCBieSB0aGUgQ2xvdWRmbGFyZSBlZGdlKSB3aGVuIHRoZSBoZWFkZXIgaXMgcHJlc2VudCBhbmQgYFRSVVNUX1BST1hZYCBhbmQgYFRSVVNUX0NGX0hFQURFUmAgYXJlIGJvdGggb24gKHRoZSBkZWZhdWx0cykuIE90aGVyd2lzZSBpdCBpcyB0aGUgbGFzdCBgWC1Gb3J3YXJkZWQtRm9yYCBob3Agd2l0aCBgVFJVU1RfUFJPWFk9dHJ1ZWAsIG9yIHRoZSBzb2NrZXQgYWRkcmVzcyB3aXRoIGBUUlVTVF9QUk9YWT1mYWxzZWAuCgojIyMgY3VybCBleGFtcGxlcwoKYGBgYmFzaApCQVNFPWh0dHBzOi8vc2NvdXRlci50b21lcmgyMDAxLmNvbQoKIyBoZWFsdGgKY3VybCAtcyAiJEJBU0UvaGVhbHRoeiIKCiMgdXBsb2FkIC8gcmVwbGFjZSBhIGNoYXJhY3RlciAocHJlc2V0Lmpzb24gaXMgYSBmaWxlIGV4cG9ydGVkIGJ5IG1hcGxlc2NvdXRlci5jb20ncyBTYXZlLWFzLUpTT04pCmN1cmwgLXMgLVggUFVUICIkQkFTRS92MS9jaGFyYWN0ZXJzL0hUb21lciIgXAogIC1IICdDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24nIFwKICAtZCAie1wicHJlc2V0XCI6ICQoY2F0IHByZXNldC5qc29uKSwgXCJsYWJlbFwiOiBcIkhUb21lclwifSIKCiMgZmV0Y2ggaXQgKG5vdGUgdGhlIEVUYWcpCmN1cmwgLXNpICIkQkFTRS92MS9jaGFyYWN0ZXJzL0hUb21lciIKCiMgY2hlYXAgY2hhbmdlIGNoZWNrCmN1cmwgLXNJICIkQkFTRS92MS9jaGFyYWN0ZXJzL0hUb21lciIKCiMgY29uZGl0aW9uYWwgcmVwbGFjZTogb25seSBpZiBub2JvZHkgZWxzZSB3cm90ZSBzaW5jZQpjdXJsIC1zIC1YIFBVVCAiJEJBU0UvdjEvY2hhcmFjdGVycy9IVG9tZXIiIFwKICAtSCAnQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uJyBcCiAgLUggJ0lmLU1hdGNoOiAiMjAyNi0wOS0wM1QwODoxNTo0Mi4xMTdaIicgXAogIC1kICJ7XCJwcmVzZXRcIjogJChjYXQgcHJlc2V0Lmpzb24pfSIKCiMgbGlzdCBldmVyeW9uZQpjdXJsIC1zICIkQkFTRS92MS9jaGFyYWN0ZXJzIgoKIyBjaGFyYWN0ZXIgbG9vayAoaW1hZ2UgVVJMLCBsZXZlbCwgam9iLCB3b3JsZCkgZnJvbSB0aGUgR01TIHJhbmtpbmdzCmN1cmwgLXMgIiRCQVNFL3YxL2F2YXRhci9IVG9tZXIiCgojIGRlbGV0ZSAobXVzdCBjb25maXJtIHdpdGggdGhlIElHTikKY3VybCAtcyAtWCBERUxFVEUgIiRCQVNFL3YxL2NoYXJhY3RlcnMvSFRvbWVyIiAtSCAnWC1Db25maXJtOiBIVG9tZXInIC1vIC9kZXYvbnVsbCAtdyAnJXtodHRwX2NvZGV9XG4nCgojIENPUlMgcHJlZmxpZ2h0IGFzIHRoZSBicm93c2VyIHdvdWxkIHNlbmQgaXQKY3VybCAtc2kgLVggT1BUSU9OUyAiJEJBU0UvdjEvY2hhcmFjdGVycy9IVG9tZXIiIFwKICAtSCAnT3JpZ2luOiBodHRwczovL21hcGxlc2NvdXRlci5jb20nIFwKICAtSCAnQWNjZXNzLUNvbnRyb2wtUmVxdWVzdC1NZXRob2Q6IFBVVCcgXAogIC1IICdBY2Nlc3MtQ29udHJvbC1SZXF1ZXN0LUhlYWRlcnM6IGNvbnRlbnQtdHlwZSxpZi1tYXRjaCcKYGBgCgojIyBDb25maWd1cmF0aW9uCgpBbGwgdmlhIGVudmlyb25tZW50IHZhcmlhYmxlcy4KCnwgVmFyaWFibGUgfCBEZWZhdWx0IHwgTWVhbmluZyB8CnwgLS0tIHwgLS0tIHwgLS0tIHwKfCBgUE9SVGAgfCBgODA4MGAgfCBMaXN0ZW4gcG9ydCB8CnwgYEhPU1RgIHwgYDAuMC4wLjBgIHwgQmluZCBhZGRyZXNzIHwKfCBgREFUQV9ESVJgIHwgYC9kYXRhYCB8IFN0b3JlIHJvb3Q7IGRvY3VtZW50cyBsaXZlIGluIGBEQVRBX0RJUi9jaGFyYWN0ZXJzL2AsIHRoZSBhdmF0YXIgY2FjaGUgaW4gYERBVEFfRElSL2F2YXRhcnMuanNvbmAgfAp8IGBMT0dfTEVWRUxgIHwgYGluZm9gIHwgcGlubyBsZXZlbCB8CnwgYExPR19QUkVUVFlgIHwgYGZhbHNlYCB8IEh1bWFuLXJlYWRhYmxlIGxvZ3MgKGRldiBvbmx5OyBuZWVkcyBgcGluby1wcmV0dHlgKSB8CnwgYFRSVVNUX1BST1hZYCB8IGB0cnVlYCB8IFRydXN0IG9uZSBwcm94eSBob3AgKHRyYWVmaWspIGZvciBgWC1Gb3J3YXJkZWQtKmAuIFdpdGggYGZhbHNlYCBubyBmb3J3YXJkaW5nIGhlYWRlciBpcyByZWFkIGF0IGFsbCBhbmQgdGhlIHNvY2tldCBhZGRyZXNzIGlzIHRoZSBjbGllbnQgfAp8IGBUUlVTVF9DRl9IRUFERVJgIHwgYHRydWVgIHwgS2V5IHRoZSByYXRlIGxpbWl0ZXIgb24gYENGLUNvbm5lY3RpbmctSVBgIChzZXQgYnkgdGhlIENsb3VkZmxhcmUgZWRnZSkgd2hlbiBwcmVzZW50LCBlbHNlIGZhbGwgYmFjayB0byB0aGUgYWRkcmVzcyBhYm92ZS4gT25seSB1c2VkIHdoZW4gYFRSVVNUX1BST1hZPXRydWVgLiBUdXJuIGl0IG9mZiBpZiB0cmFlZmlrIGlzIHJlYWNoYWJsZSB3aXRob3V0IENsb3VkZmxhcmUgaW4gZnJvbnQsIG90aGVyd2lzZSBhIGNsaWVudCBjYW4gZm9yZ2UgdGhlIGhlYWRlciBhbmQgZ2V0IGEgZnJlc2ggYnVja2V0IHBlciByZXF1ZXN0IHwKfCBgQk9EWV9MSU1JVGAgfCBgMjYyMTQ0YCB8IE1heCByZXF1ZXN0IGJvZHkgaW4gYnl0ZXMgfAp8IGBSRUFEX1JBVEVfTElNSVRgIHwgYDYwMGAgfCBSZWFkcyBwZXIgbWludXRlIHBlciBJUCB8CnwgYFdSSVRFX1JBVEVfTElNSVRgIHwgYDYwYCB8IFdyaXRlcyBwZXIgbWludXRlIHBlciBJUCwgcGVyIGVuZHBvaW50IHwKfCBgTUFYX0NIQVJBQ1RFUlNgIHwgYDIwMDAwYCB8IE1heCBzdG9yZWQgY2hhcmFjdGVycy4gTmV3IElHTnMgcGFzdCB0aGlzIGdldCBgNTA3YCwgc28gb25lIGNsaWVudCBjYW5ub3QgZmlsbCB0aGUgZGlzayB8CnwgYEFWQVRBUl9ISVRfVFRMX01TYCB8IGA4NjQwMDAwMGAgfCBIb3cgbG9uZyBhIGZvdW5kIGF2YXRhciBpcyByZXVzZWQgYmVmb3JlIGFza2luZyBOZXhvbiBhZ2FpbiAoMjQgaCkgfAp8IGBBVkFUQVJfTUlTU19UVExfTVNgIHwgYDM2MDAwMDBgIHwgSG93IGxvbmcgYSAibm90IGZvdW5kIiBhdmF0YXIgYW5zd2VyIGlzIHJldXNlZCAoMSBoKSB8CnwgYEFWQVRBUl9VUFNUUkVBTWAgfCBgaHR0cHM6Ly93d3cubmV4b24uY29tL2FwaS9tYXBsZXN0b3J5L25vLWF1dGgvcmFua2luZy92Mi9uYWAgfCBSYW5raW5nIEFQSSBiYXNlIFVSTCB0aGUgYXZhdGFyIHJvdXRlIHByb3hpZXMuIE9ubHkgd29ydGggY2hhbmdpbmcgdG8gcG9pbnQgYXQgYSBzdHViIHwKCiMjIERldmVsb3BtZW50CgpgYGBiYXNoCm5wbSBjaQpucG0gdGVzdCAgICAgICAgICAjIHZpdGVzdDogc3RvcmUgdW5pdCB0ZXN0cyArIHJvdXRlIHRlc3RzIHZpYSBmYXN0aWZ5LmluamVjdCAodGhlIGF2YXRhciByb3V0ZSBydW5zIGFnYWluc3QgYSBzdHViYmVkIGZldGNoLCBubyBuZXR3b3JrKQpucG0gcnVuIGJ1aWxkICAgICAjIHRzYyAtPiBkaXN0LwpucG0gcnVuIGRldiAgICAgICAjIGJ1aWxkLCB0aGVuIHNlcnZlIG9uIDo4MDgwIHdpdGggREFUQV9ESVI9Li90bXAvZGF0YSBhbmQgcHJldHR5IGxvZ3MKYGBgCgpMYXlvdXQ6CgotIGBzcmMvc3RvcmUudHNgOiBmaWxlLWJhY2tlZCBhdG9taWMgc3RvcmUgKyBpbi1tZW1vcnkgaW5kZXguCi0gYHNyYy92YWxpZGF0ZS50c2A6IElHTiAvIHByZXNldCAvIGJvZHkgdmFsaWRhdGlvbiBhbmQgYG1ldGFgIGRlcml2YXRpb24uCi0gYHNyYy9hdmF0YXIudHNgOiBOZXhvbiByYW5raW5nIGxvb2stdXAsIGF2YXRhciBjYWNoZSwgYGF2YXRhcnMuanNvbmAgcGVyc2lzdGVuY2UsIGluLWZsaWdodCBkZWR1cGUuCi0gYHNyYy9hcHAudHNgOiBGYXN0aWZ5IGFwcCAocm91dGVzLCBDT1JTLCByYXRlIGxpbWl0cywgZXJyb3IgbWFwcGluZykuCi0gYHNyYy9zZXJ2ZXIudHNgOiBlbnRyeXBvaW50IHdpdGggZ3JhY2VmdWwgc2h1dGRvd24uCi0gYHRlc3QvYDogdml0ZXN0IHN1aXRlcy4KCiMjIERvY2tlcgoKYGBgYmFzaApkb2NrZXIgYnVpbGQgLXQgbWFwbGVzY291dGVyLWNsb3VkIC4KZG9ja2VyIHJ1biAtLXJtIC1wIDgwODA6ODA4MCAtdiAiJFBXRC9kYXRhOi9kYXRhIiBtYXBsZXNjb3V0ZXItY2xvdWQKIyBvciB0aGUgcHVibGlzaGVkIGltYWdlCmRvY2tlciBydW4gLS1ybSAtcCA4MDgwOjgwODAgLXYgIiRQV0QvZGF0YTovZGF0YSIgZ2hjci5pby90b21lcmgyMDAxL21hcGxlc2NvdXRlci1jbG91ZDpsYXRlc3QKYGBgCgpJbWFnZSBub3RlczoKCi0gTXVsdGktc3RhZ2UgYG5vZGU6MjAtYWxwaW5lYCwgcHJvZHVjdGlvbiBkZXBlbmRlbmNpZXMgb25seSwgcnVucyBhcyB0aGUgbm9uLXJvb3QgYG5vZGVgIHVzZXIuCi0gYEVYUE9TRSA4MDgwYCwgYFZPTFVNRSAvZGF0YWAsIGJ1aWx0LWluIGBIRUFMVEhDSEVDS2AgaGl0dGluZyBgL2hlYWx0aHpgLgotIFNhZmUgdG8gcnVuIHdpdGggYSBjdXN0b20gYHVzZXI6YCAoZm9yIGV4YW1wbGUgYFBVSUQ6UEdJRGApOyBqdXN0IG1ha2Ugc3VyZSB0aGF0IHVzZXIgb3ducyB0aGUgYC9kYXRhYCBtb3VudC4KCiMjIENJIGFuZCBpbWFnZSBwdWJsaXNoaW5nCgpXb3JrZmxvdzogYC5naXRodWIvd29ya2Zsb3dzL3B1Ymxpc2gueW1sYC4KCi0gUHVsbCByZXF1ZXN0cyBhbmQgcHVzaGVzIHRvIGBtYWluYDogYG5wbSBjaWAsIGBucG0gdGVzdGAsIGBucG0gcnVuIGJ1aWxkYC4KLSBQdXNoZXMgdG8gYG1haW5gIGFkZGl0aW9uYWxseSBidWlsZCBhIG11bHRpLWFyY2ggaW1hZ2UgKGBsaW51eC9hbWQ2NGAsIGBsaW51eC9hcm02NGApIGFuZCBwdXNoCiAgYGdoY3IuaW8vdG9tZXJoMjAwMS9tYXBsZXNjb3V0ZXItY2xvdWQ6bGF0ZXN0YCBhbmQgYDpzaGEtPHNob3J0Nz5gLgotIEF1dGggaXMgdGhlIHdvcmtmbG93J3MgYEdJVEhVQl9UT0tFTmAgKGBwZXJtaXNzaW9uczogcGFja2FnZXM6IHdyaXRlYCkuCgoqKk9uZS10aW1lIHN0ZXAgYWZ0ZXIgdGhlIGZpcnN0IHB1Ymxpc2g6KiogdGhlIEdIQ1IgcGFja2FnZSBpcyBjcmVhdGVkIHByaXZhdGUuIE1ha2UgaXQgcHVibGljIHNvIHRoZSBzZXJ2ZXIgY2FuIHB1bGwgaXQgd2l0aG91dCBjcmVkZW50aWFsczoKR2l0SHViIHByb2ZpbGUgLT4gUGFja2FnZXMgLT4gYG1hcGxlc2NvdXRlci1jbG91ZGAgLT4gUGFja2FnZSBzZXR0aW5ncyAtPiBEYW5nZXIgWm9uZSAtPiBDaGFuZ2UgdmlzaWJpbGl0eSAtPiBQdWJsaWMuCgojIyBEZXBsb3ltZW50CgpSdW5zIG9uIHRoZSBob21lIHNlcnZlciBhcyBhIG5vcm1hbCBzdGFjazoKCi0gdHJhZWZpayByb3V0ZXIgb24gYHNjb3V0ZXIudG9tZXJoMjAwMS5jb21gLCBtaWRkbGV3YXJlcyBgY2xvdWRmbGFyZXdhcnBgICsgYGNyb3dkc2VjYCAobm8gYXV0aCBtaWRkbGV3YXJlLCBieSBkZXNpZ24pLgotIFRoZSBDbG91ZGZsYXJlIHR1bm5lbCBtdXN0IHN0YXkgdGhlIG9ubHkgd2F5IHRvIHJlYWNoIHRoYXQgcm91dGVyLiBgY2xvdWRmbGFyZXdhcnBgIHJld3JpdGVzIGBYLUZvcndhcmRlZC1Gb3JgIGZyb20gYENGLUNvbm5lY3RpbmctSVBgIG9ubHkgZm9yIENsb3VkZmxhcmUgc291cmNlcywgc28gYSBMQU4gY2xpZW50IHRoYXQgY291bGQgcmVhY2ggdHJhZWZpayBkaXJlY3RseSBjb3VsZCBpbmplY3QgaXRzIG93biBgQ0YtQ29ubmVjdGluZy1JUGAuIElmIHlvdSBldmVyIGV4cG9zZSB0aGUgc2VydmljZSBhbm90aGVyIHdheSwgc2V0IGBUUlVTVF9DRl9IRUFERVI9ZmFsc2VgLgotIEVudjogYFBPUlQ9ODA4MGAsIGBEQVRBX0RJUj0vZGF0YWAsIGBOT0RFX0VOVj1wcm9kdWN0aW9uYC4KLSBWb2x1bWU6IGA8ZGF0YSBkYXRhc2V0Pi9tYXBsZXNjb3V0ZXItY2xvdWQ6L2RhdGFgOyBjb250YWluZXIgcnVucyBhcyBgUFVJRDpQR0lEYC4KLSBUaGUgaW1hZ2UncyBvd24gaGVhbHRoY2hlY2sgaXMgdXNlZDsgdGhlIHN0YWNrLWxldmVsIG9uZSBzdGF5cyBvZmYuCi0gQ2FwIHRoZSBjb250YWluZXIgbG9ncy4gRG9ja2VyIGtlZXBzIHN0ZG91dCBmb3JldmVyIGJ5IGRlZmF1bHQsIHNvIHNldCBvbiB0aGUgc2VydmljZToKICBgbG9nZ2luZzogeyBkcml2ZXI6IGpzb24tZmlsZSwgb3B0aW9uczogeyBtYXgtc2l6ZTogMTBtLCBtYXgtZmlsZTogIjMiIH0gfWAuCiAgRWFjaCByZXF1ZXN0IGxvZ3Mgb25lIGxpbmUgKG1ldGhvZCwgcm91dGUgcGF0dGVybiwgc3RhdHVzLCBkdXJhdGlvbiwgY2xpZW50IElQKS4gVGhlIElHTiBpcyBub3QgbG9nZ2VkLgoKVmVyaWZ5IGFmdGVyIGRlcGxveToKCmBgYGJhc2gKY3VybCAtcyBodHRwczovL3Njb3V0ZXIudG9tZXJoMjAwMS5jb20vaGVhbHRoegpgYGAKCiMjIExpY2Vuc2UKCk1JVAo=
+# MapleScouter Cloud
+
+Tiny cloud-save backend for the [MapleScouter Enhancements](https://github.com/tomerh2001/maplescouter-enhancements) userscript and extension.
+It stores Character page presets from [maplescouter.com](https://maplescouter.com), keyed by IGN, so a character can be synced between browsers and devices.
+
+Live instance: `https://scouter.tomerh2001.com`
+
+## How it works
+
+- One JSON document per character, keyed by the IGN lowercased.
+- No accounts and no tokens. **Anyone can read or overwrite any IGN.** It is a convenience sync, not a vault.
+- File-backed store: `DATA_DIR/characters/<ign>.json`, written atomically (temp file + fsync + rename). No database.
+- In-memory index rebuilt from the directory on boot; list and `HEAD` never touch the disk.
+- Optimistic concurrency via `ETag` / `If-Match`.
+- A small avatar route proxies Nexon's public GMS ranking API (the browser cannot call it directly) and caches the result.
+- Node 20, TypeScript, Fastify 5, pino JSON logs on stdout.
+
+## API
+
+Base URL: `https://scouter.tomerh2001.com`. Every response is JSON. CORS is open (`Access-Control-Allow-Origin: *`).
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| `GET` | `/healthz` | Liveness + character count | `{ "ok": true, "characters": N }` |
+| `GET` | `/v1/characters` | List summaries, newest first | Cap 500, optional `?limit=N` |
+| `GET` | `/v1/characters/:ign` | Full document | `ETag: "<updatedAt>"`, honours `If-None-Match` (304) |
+| `HEAD` | `/v1/characters/:ign` | Headers only | Cheap sync polling; same `ETag` |
+| `PUT` | `/v1/characters/:ign` | Create or replace | Body `{ preset, label?, meta? }`; optional `If-Match`; `201` created / `200` updated |
+| `DELETE` | `/v1/characters/:ign` | Delete | Requires header `X-Confirm: <ign>`; returns `204` |
+| `GET` | `/v1/avatar/:ign` | Character look from the GMS rankings | Image URL, level, job, world; cached, `Cache-Control: public, max-age=3600` |
+
+### IGN rules
+
+- Must match `^[A-Za-z0-9]{1,16}$`.
+- Lookups are case-insensitive (`HTomer` and `htomer` are the same character).
+- The display case of the most recent `PUT` is kept in `ign`.
+
+### Document
+
+```json
+{
+  "ign": "HTomer",
+  "label": "HTomer",
+  "createdAt": "2026-09-01T12:00:00.000Z",
+  "updatedAt": "2026-09-03T08:15:42.117Z",
+  "meta": { "class": "은월", "level": 290, "hexaStat": 2 },
+  "preset": {
+    "type": "maplescouter-manual-preset",
+    "v": 1,
+    "savedAt": "2026-09-03T08:15:41.000Z",
+    "label": "HTomer",
+    "data": { "stat": { "myClass": "은월", "level": "290" }, "hexa": { "hexaStat": 2 }, "doping": {}, "linkSkill": {} }
+  }
+}
+```
+
+`meta` is derived on the server from `preset.data.stat.myClass`, `preset.data.stat.level` and `preset.data.hexa.hexaStat`.
+A client-sent `meta` only fills gaps (for example `hexaStat` when the preset has none). `hexaStat` is `null` when unknown.
+
+### PUT body
+
+```json
+{ "preset": { "type": "maplescouter-manual-preset", "v": 1, "savedAt": "...", "label": "...", "data": { } }, "label": "optional", "meta": { "hexaStat": 2 } }
+```
+
+Validation:
+
+- `preset.type` must be `maplescouter-manual-preset`, `preset.v` must be `1`.
+- `preset.data` must be an object containing `stat`, `hexa`, `doping`, `linkSkill` objects.
+- `preset.data.stat.myClass`: non-empty string. `preset.data.stat.level`: integer 0..300 (numeric string or number).
+- `label`: optional string, trimmed, max 64 chars. Defaults to the IGN.
+- Body limit 256 KB. Unknown keys inside the `preset` envelope are dropped; `preset.data` is stored verbatim.
+
+Concurrency: send `If-Match: "<updatedAt>"` (the `ETag` you last saw). If the stored `updatedAt` differs you get `409 { "error": "conflict", "updatedAt": "<current or null>" }` and nothing is written.
+
+### Avatar: `GET /v1/avatar/:ign`
+
+Looks the IGN up on Nexon's public GMS ranking API (`.../ranking/v2/na`, overall weekly board, regular worlds first, then Heroic worlds) and returns the character's current look. Nexon sends no CORS headers, so the extension cannot ask Nexon from maplescouter.com; this route proxies it. It has nothing to do with the stored presets: an IGN can have an avatar and no document, or the other way round.
+
+```json
+{
+  "ign": "HTomer",
+  "level": 291,
+  "job": "Shade",
+  "worldId": 1,
+  "image": "https://msavatar1.nexon.net/Character/....png",
+  "fetchedAt": "2026-09-03T22:29:57.013Z"
+}
+```
+
+- `ign` is spelled the way Nexon has it. `image` is a 96x96 PNG served by Nexon (no CSP on maplescouter.com, so `<img src>` works).
+- `404 { "error": "not_found" }` when the character is on neither board. `502 { "error": "upstream" }` when Nexon fails and nothing is cached.
+- Cache: in memory, keyed by the lowercase IGN. Hits are reused for 24 h, misses for 1 h (`AVATAR_HIT_TTL_MS`, `AVATAR_MISS_TTL_MS`). Hits are written to `DATA_DIR/avatars.json` (atomic temp file + rename) and loaded on boot, so a restart does not refetch. If Nexon fails while an expired hit is cached, the stale hit is served. Expired hits are kept for that purpose for 7 days, then dropped from memory and from the file. At most 20 000 entries; the oldest are dropped.
+- Concurrent requests for one IGN share a single upstream call. Each upstream call has an 8 s timeout and sends the User-Agent `Mozilla/5.0 (compatible; maplescouter-cloud/1.0; +https://github.com/tomerh2001/maplescouter-cloud)`.
+- `200` and `404` carry `Cache-Control: public, max-age=3600` (every other route is `no-store`). Counted by the read rate limit.
+
+### Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 400 | `invalid_ign` | IGN fails the regex |
+| 400 | `invalid_body` | Validation failed (`detail` says why) |
+| 400 | `invalid_json` | Body is not valid JSON |
+| 400 | `confirm_required` | `DELETE` without a matching `X-Confirm` |
+| 404 | `not_found` | Unknown character or route |
+| 409 | `conflict` | `If-Match` mismatch (`updatedAt` = current value, or `null`) |
+| 413 | `payload_too_large` | Body over 256 KB |
+| 415 | `unsupported_media_type` | Missing `Content-Type: application/json` |
+| 429 | `rate_limited` | See below; `Retry-After` header is set |
+| 502 | `upstream` | `GET /v1/avatar/:ign` only: Nexon did not answer and there is no cached look for that IGN |
+| 507 | `storage_full` | The store holds `MAX_CHARACTERS` characters and this IGN is new. Overwriting an existing IGN still works |
+
+### Rate limits (hygiene, not auth)
+
+- Reads (`GET`/`HEAD`): 600 per minute per IP, shared across read endpoints.
+- Writes (`PUT`, `DELETE`): 60 per minute per IP, per endpoint.
+- `/healthz`, `/` and CORS preflights are never limited.
+- The client IP is `CF-Connecting-IP` (set by the Cloudflare edge) when the header is present and `TRUST_PROXY` and `TRUST_CF_HEADER` are both on (the defaults). Otherwise it is the last `X-Forwarded-For` hop with `TRUST_PROXY=true`, or the socket address with `TRUST_PROXY=false`.
+
+### curl examples
+
+```bash
+BASE=https://scouter.tomerh2001.com
+
+# health
+curl -s "$BASE/healthz"
+
+# upload / replace a character (preset.json is a file exported by maplescouter.com's Save-as-JSON)
+curl -s -X PUT "$BASE/v1/characters/HTomer" \
+  -H 'Content-Type: application/json' \
+  -d "{\"preset\": $(cat preset.json), \"label\": \"HTomer\"}"
+
+# fetch it (note the ETag)
+curl -si "$BASE/v1/characters/HTomer"
+
+# cheap change check
+curl -sI "$BASE/v1/characters/HTomer"
+
+# conditional replace: only if nobody else wrote since
+curl -s -X PUT "$BASE/v1/characters/HTomer" \
+  -H 'Content-Type: application/json' \
+  -H 'If-Match: "2026-09-03T08:15:42.117Z"' \
+  -d "{\"preset\": $(cat preset.json)}"
+
+# list everyone
+curl -s "$BASE/v1/characters"
+
+# character look (image URL, level, job, world) from the GMS rankings
+curl -s "$BASE/v1/avatar/HTomer"
+
+# delete (must confirm with the IGN)
+curl -s -X DELETE "$BASE/v1/characters/HTomer" -H 'X-Confirm: HTomer' -o /dev/null -w '%{http_code}\n'
+
+# CORS preflight as the browser would send it
+curl -si -X OPTIONS "$BASE/v1/characters/HTomer" \
+  -H 'Origin: https://maplescouter.com' \
+  -H 'Access-Control-Request-Method: PUT' \
+  -H 'Access-Control-Request-Headers: content-type,if-match'
+```
+
+## Configuration
+
+All via environment variables.
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `PORT` | `8080` | Listen port |
+| `HOST` | `0.0.0.0` | Bind address |
+| `DATA_DIR` | `/data` | Store root; documents live in `DATA_DIR/characters/`, the avatar cache in `DATA_DIR/avatars.json` |
+| `LOG_LEVEL` | `info` | pino level |
+| `LOG_PRETTY` | `false` | Human-readable logs (dev only; needs `pino-pretty`) |
+| `TRUST_PROXY` | `true` | Trust one proxy hop (traefik) for `X-Forwarded-*`. With `false` no forwarding header is read at all and the socket address is the client |
+| `TRUST_CF_HEADER` | `true` | Key the rate limiter on `CF-Connecting-IP` (set by the Cloudflare edge) when present, else fall back to the address above. Only used when `TRUST_PROXY=true`. Turn it off if traefik is reachable without Cloudflare in front, otherwise a client can forge the header and get a fresh bucket per request |
+| `BODY_LIMIT` | `262144` | Max request body in bytes |
+| `READ_RATE_LIMIT` | `600` | Reads per minute per IP |
+| `WRITE_RATE_LIMIT` | `60` | Writes per minute per IP, per endpoint |
+| `MAX_CHARACTERS` | `20000` | Max stored characters. New IGNs past this get `507`, so one client cannot fill the disk |
+| `AVATAR_HIT_TTL_MS` | `86400000` | How long a found avatar is reused before asking Nexon again (24 h) |
+| `AVATAR_MISS_TTL_MS` | `3600000` | How long a "not found" avatar answer is reused (1 h) |
+| `AVATAR_UPSTREAM` | `https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na` | Ranking API base URL the avatar route proxies. Only worth changing to point at a stub |
+
+## Development
+
+```bash
+npm ci
+npm test          # vitest: store unit tests + route tests via fastify.inject (the avatar route runs against a stubbed fetch, no network)
+npm run build     # tsc -> dist/
+npm run dev       # build, then serve on :8080 with DATA_DIR=./tmp/data and pretty logs
+```
+
+Layout:
+
+- `src/store.ts`: file-backed atomic store + in-memory index.
+- `src/validate.ts`: IGN / preset / body validation and `meta` derivation.
+- `src/avatar.ts`: Nexon ranking look-up, avatar cache, `avatars.json` persistence, in-flight dedupe.
+- `src/app.ts`: Fastify app (routes, CORS, rate limits, error mapping).
+- `src/server.ts`: entrypoint with graceful shutdown.
+- `test/`: vitest suites.
+
+## Docker
+
+```bash
+docker build -t maplescouter-cloud .
+docker run --rm -p 8080:8080 -v "$PWD/data:/data" maplescouter-cloud
+# or the published image
+docker run --rm -p 8080:8080 -v "$PWD/data:/data" ghcr.io/tomerh2001/maplescouter-cloud:latest
+```
+
+Image notes:
+
+- Multi-stage `node:20-alpine`, production dependencies only, runs as the non-root `node` user.
+- `EXPOSE 8080`, `VOLUME /data`, built-in `HEALTHCHECK` hitting `/healthz`.
+- Safe to run with a custom `user:` (for example `PUID:PGID`); just make sure that user owns the `/data` mount.
+
+## CI and image publishing
+
+Workflow: `.github/workflows/publish.yml`.
+
+- Pull requests and pushes to `main`: `npm ci`, `npm test`, `npm run build`.
+- Pushes to `main` additionally build a multi-arch image (`linux/amd64`, `linux/arm64`) and push
+  `ghcr.io/tomerh2001/maplescouter-cloud:latest` and `:sha-<short7>`.
+- Auth is the workflow's `GITHUB_TOKEN` (`permissions: packages: write`).
+
+**One-time step after the first publish:** the GHCR package is created private. Make it public so the server can pull it without credentials:
+GitHub profile -> Packages -> `maplescouter-cloud` -> Package settings -> Danger Zone -> Change visibility -> Public.
+
+## Deployment
+
+Runs on the home server as a normal stack:
+
+- traefik router on `scouter.tomerh2001.com`, middlewares `cloudflarewarp` + `crowdsec` (no auth middleware, by design).
+- The Cloudflare tunnel must stay the only way to reach that router. `cloudflarewarp` rewrites `X-Forwarded-For` from `CF-Connecting-IP` only for Cloudflare sources, so a LAN client that could reach traefik directly could inject its own `CF-Connecting-IP`. If you ever expose the service another way, set `TRUST_CF_HEADER=false`.
+- Env: `PORT=8080`, `DATA_DIR=/data`, `NODE_ENV=production`.
+- Volume: `<data dataset>/maplescouter-cloud:/data`; container runs as `PUID:PGID`.
+- The image's own healthcheck is used; the stack-level one stays off.
+- Cap the container logs. Docker keeps stdout forever by default, so set on the service:
+  `logging: { driver: json-file, options: { max-size: 10m, max-file: "3" } }`.
+  Each request logs one line (method, route pattern, status, duration, client IP). The IGN is not logged.
+
+Verify after deploy:
+
+```bash
+curl -s https://scouter.tomerh2001.com/healthz
+```
+
+## License
+
+MIT
